@@ -51,12 +51,20 @@ function Navbar() {
             <span>Clubs</span>
           </Link>
           <Link
-            href="/#events" 
+            href="/#events"
             onClick={handleScroll}
             className="flex items-center gap-2 hover:text-white transition-colors"
           >
             <Rocket size={18} />
             <span>Events</span>
+          </Link>
+
+          {/* --- NEW LOGIN/SIGNUP BUTTON --- */}
+          <Link
+            href="/login"
+            className="bg-rose-100 text-[#232c72] hover:bg-neutral-200 px-5 py-2 rounded-full font-semibold transition-colors shadow-sm ml-2 md:ml-4"
+          >
+            Login / Signup
           </Link>
         </div>
       </nav>

@@ -16,7 +16,7 @@ function Hero() {
   return (
     <>
       {/* HERO SECTION */}
-      <section className="flex flex-col bg-rose-100 lg:flex-row text-neutral-600 items-center justify-center gap-10 lg:gap-[15vw] min-h-[90vh] py-16 px-4">
+      <section className="flex flex-col bg-rose-100 dark:bg-rose-950 lg:flex-row text-neutral-600 dark:text-neutral-300 items-center justify-center gap-10 lg:gap-[15vw] min-h-[90vh] py-16 px-4">
         <Reveal
           delay={100}
           className="flex flex-col items-center lg:items-start text-center lg:text-left"

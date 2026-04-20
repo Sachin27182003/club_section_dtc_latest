@@ -8,11 +8,11 @@ function Footer() {
   return (
     <>
       {/* Matched the exact light grey background from the image */}
-      <footer className="bg-[#e4e5e6] pt-12 px-6 pb-12 font-sans">
+      <footer className="bg-zinc-300 dark:bg-zinc-700  pt-12 px-6 pb-12 font-sans">
         <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10">
           {/* Column 1: About DTC & Follow */}
           <Reveal className="flex flex-col items-start">
-            <h3 className="text-[#ea6c13] font-bold text-[17px] mb-5">
+            <h3 className="text-orange-500 font-bold text-[17px] mb-5">
               About DTC
             </h3>
             <Image
@@ -22,10 +22,10 @@ function Footer() {
               className="w-27.5 h-27.5 rounded-full object-cover mb-6"
               alt="DTC Logo"
             />
-            <h3 className="text-[#ea6c13] font-bold text-[17px] mb-4">
+            <h3 className="text-orange-500 font-bold text-[17px] mb-4">
               Follow DTC
             </h3>
-            <div className="flex gap-3">
+            <div className="flex gap-3 -ml-8">
               {/* Matched the white circular background with dark grey icons */}
               {[
                 {
@@ -48,7 +48,7 @@ function Footer() {
                 <a
                   href={url}
                   key={i}
-                  className="w-8 h-8 bg-white flex items-center justify-center rounded-full text-gray-600 hover:text-white hover:bg-[#ea6c13] transition-colors shadow-sm"
+                  className="w-8 h-8 bg-rose-100 dark:bg-rose-950 flex items-center justify-center rounded-full text-gray-600 dark:text-gray-300 hover:text-white hover:bg-[#ea6c13] transition-colors shadow-sm"
                 >
                   <Icon size={16} />
                 </a>
@@ -61,13 +61,13 @@ function Footer() {
             <h3 className="text-[#ea6c13] font-bold text-[17px] mb-5">
               Important Links
             </h3>
-            <ul className="flex flex-col gap-3 text-[#45478c] text-[15px]">
+            <ul className="flex flex-col gap-3 text-[#45478c] dark:text-indigo-200 text-[15px]">
               <li>
                 <a
                   href="https://delhitechnicalcampus.ac.in/media-coverage/"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="hover:text-[#ea6c13] transition-colors"
+                  className="hover:text-orange-500 transition-colors"
                 >
                   Media Coverage
                 </a>
@@ -77,7 +77,7 @@ function Footer() {
                   href="https://delhitechnicalcampus.ac.in/aicte-approval/"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="hover:text-[#ea6c13] transition-colors"
+                  className="hover:text-orange-500 transition-colors"
                 >
                   AICTE Approval
                 </a>
@@ -87,7 +87,7 @@ function Footer() {
                   href="https://delhitechnicalcampus.ac.in/nirf/"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="hover:text-[#ea6c13] transition-colors"
+                  className="hover:text-orange-500 transition-colors"
                 >
                   NIRF
                 </a>
@@ -97,7 +97,7 @@ function Footer() {
                   href="https://www.aicte-india.org/feedback/"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="hover:text-[#ea6c13] transition-colors"
+                  className="hover:text-orange-500 transition-colors"
                 >
                   AICTE Feedback
                 </a>
@@ -107,7 +107,7 @@ function Footer() {
                   href="https://delhitechnicalcampus.ac.in/wp-content/uploads/2024/04/fullAICTE-Video-2024-25.mp4"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="hover:text-[#ea6c13] transition-colors"
+                  className="hover:text-orange-500 transition-colors"
                 >
                   AICTE Video 2025-26
                 </a>
@@ -117,7 +117,7 @@ function Footer() {
                   href="https://delhitechnicalcampus.ac.in/privacy-policy/"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="hover:text-[#ea6c13] transition-colors"
+                  className="hover:text-orange-500 transition-colors"
                 >
                   Privacy Policy
                 </a>
@@ -127,7 +127,7 @@ function Footer() {
                   href="https://delhitechnicalcampus.ac.in/contact-us/"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="hover:text-[#ea6c13] transition-colors"
+                  className="hover:text-orange-500 transition-colors"
                 >
                   Contact Us
                 </a>
@@ -137,27 +137,27 @@ function Footer() {
 
           {/* Column 3: Contact Us */}
           <Reveal delay={200} className="flex flex-col items-start">
-            <h3 className="text-[#ea6c13] font-bold text-[17px] mb-5">
+            <h3 className="text-orange-500 font-bold text-[17px] mb-5">
               Contact Us
             </h3>
-            <div className="flex flex-col gap-5 text-[#45478c] text-[15px]">
+            <div className="flex flex-col gap-5 text-[#45478c] dark:text-indigo-200 text-[15px]">
               {/* Phone Section */}
               <div className="flex items-start gap-3">
                 <Phone
-                  className="text-[#ea6c13] w-5 h-5 shrink-0 mt-0.5 fill-[#ea6c13]"
+                  className="text-orange-500 w-5 h-5 shrink-0 mt-0.5 fill-[#ea6c13]"
                   size={18}
                 />
                 <p>
                   <a
                     href="tel:+919205752300"
-                    className="hover:text-[#ea6c13] hover:underline transition-colors"
+                    className="hover:text-orange-500 hover:underline transition-colors"
                   >
                     9205752300
                   </a>
                   {", "}
                   <a
                     href="tel:+918527687800"
-                    className="hover:text-[#ea6c13] hover:underline transition-colors"
+                    className="hover:text-orange-500 hover:underline transition-colors"
                   >
                     8527687800
                   </a>
@@ -165,7 +165,7 @@ function Footer() {
                   <br />
                   <a
                     href="tel:01206439103"
-                    className="hover:text-[#ea6c13] hover:underline transition-colors"
+                    className="hover:text-orange-500 hover:underline transition-colors"
                   >
                     01206439103
                   </a>
