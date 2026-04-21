@@ -1,3 +1,5 @@
+"use client";
+
 import React from "react";
 import { Reveal } from "./Reveal";
 import { Facebook, Instagram, Linkedin, Twitter } from "@/helpers/footer_svg";

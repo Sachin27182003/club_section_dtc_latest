@@ -1,5 +1,8 @@
 {
   "compilerOptions": {
+    "paths": {
+      "@/prisma-client": ["./app/generated/prisma"]
+    },
     "target": "ES2017",
     "lib": ["dom", "dom.iterable", "esnext"],
     "allowJs": true,
