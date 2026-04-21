@@ -37,6 +37,10 @@ export default async function RootLayout({
     console.error("DATABASE URL IS MISSING");
   }
 
+  console.log(process.env.DATABASE_URL);
+  console.log(process.env.MODERATOR_SECRET_KEY);
+  console.log(process.env.AUTH_SECRET);
+
   return (
     <html lang="en">
       <body>
