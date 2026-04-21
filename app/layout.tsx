@@ -6,7 +6,7 @@ import Navbar from "@/app/_components/Navbar";
 import { auth } from "@/lib/auth";
 import Footer from "./_components/Footer";
 import Link from "next/link";
-import { Toaster } from "react-hot-toast";
+import toast, { Toaster } from "react-hot-toast";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -32,6 +32,11 @@ export default async function RootLayout({
   children: React.ReactNode;
 }) {
   const session = await auth();
+
+  if (!process.env.DATABASE_URL) {
+    console.error("DATABASE URL IS MISSING");
+  }
+
   return (
     <html lang="en">
       <body>
