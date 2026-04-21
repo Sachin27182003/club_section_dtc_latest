@@ -15,6 +15,10 @@ import Link from "next/link";
 // Added local fallback components for the removed brand icons
 
 export default function Home() {
+
+    console.log("@URl", process.env.DATABASE_URL);
+  console.log("@KEY", process.env.MODERATOR_SECRET_KEY);
+  console.log("@SECRET", process.env.AUTH_SECRET);
   // --- Carousel Logic ---
 
   return (
