@@ -31,7 +31,6 @@ const { mutate: handleLogin, isPending } = useMutation({
 // 2. Extract data in the onSubmit handler
 const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
   e.preventDefault();
-  console.log("Submit clicked!");
   const formData = new FormData(e.currentTarget); // Extract HERE
   handleLogin(formData); // Pass the data, not the event
 };

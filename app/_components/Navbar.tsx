@@ -13,7 +13,6 @@ interface NavbarProps {
 
 function Navbar({ session }: NavbarProps) {
   // Debugging log for session state
-  console.log("NAVBAR SESSION CHECK:", session);
 
   const handleScroll = (e: React.MouseEvent<HTMLAnchorElement>) => {
     if (window.location.pathname === "/") {

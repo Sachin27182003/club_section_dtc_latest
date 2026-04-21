@@ -23,24 +23,22 @@ export default function SignupPage() {
     Error,
     SignupFormData
   >({
-    mutationFn: async (data: SignupFormData): Promise<ActionResponse> => {
+    mutationFn: async (data: SignupFormData) => {
       const result = await createUser(data);
+
+      // If result has an error, we THROW it.
+      // This forces React Query to move from 'onSuccess' to 'onError'.
       if (result.error) {
         throw new Error(result.error);
       }
       return result;
     },
     onSuccess: () => {
-      toast.success(
-        isModerator
-          ? "Account active! Redirecting..."
-          : "Request sent! Waiting for Moderator approval...",
-      );
-      // Redirect them to login after 2 seconds
-      setTimeout(() => router.push("/"), 2000);
+      toast.success("Account created!");
     },
     onError: (error: Error) => {
-      toast.error(error.message || "Something went wrong. Please try again.");
+      // This now catches the "A user with this email already exists" message
+      toast.error(error.message);
     },
   });
 

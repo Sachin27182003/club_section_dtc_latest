@@ -6,6 +6,7 @@ import Navbar from "@/app/_components/Navbar";
 import { auth } from "@/lib/auth";
 import Footer from "./_components/Footer";
 import Link from "next/link";
+import { Toaster } from "react-hot-toast";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -36,6 +37,7 @@ export default async function RootLayout({
       <body>
         <Providers>
           <Navbar session={session} />
+          <Toaster position="top-center" reverseOrder={false} />
           <main>{children}</main>
           <Footer />
           <div className="w-full text-sm py-4 px-4 md:px-10 flex items-center justify-center md:justify-center text-center">

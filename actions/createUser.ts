@@ -55,12 +55,12 @@ export async function createUser(
     await signIn("credentials", {
       email,
       password,
-      redirect: false, // We handle redirection on the frontend
+      redirect: false, 
     });
 
     return { success: true };
   } catch (error) {
     console.error("DB_ERROR:", error);
-    return { error: "Something went wrong while creating the account." };
+    return { error: `Something went wrong while creating the account.`, };
   }
 }
