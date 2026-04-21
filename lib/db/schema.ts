@@ -1,6 +1,5 @@
 // lib/db/schema.ts
 import { mysqlTable, varchar, timestamp, mysqlEnum } from "drizzle-orm/mysql-core";
-import { sql } from "drizzle-orm";
 
 // Changed PRESIDENT to CLUB_ADMIN
 export const userRoleEnum = mysqlEnum('user_role', ['CLUB_ADMIN', 'MODERATOR']);
