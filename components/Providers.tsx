@@ -1,15 +1,20 @@
+// components/Providers.tsx
 "use client";
 
+import React, { useState } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { useState } from "react";
+import { SessionProvider } from "next-auth/react"; // ADD THIS
 
 export default function Providers({ children }: { children: React.ReactNode }) {
-  // Use useState to ensure the QueryClient is only created once per browser session
+  // Ensure React Query client is stable across renders
   const [queryClient] = useState(() => new QueryClient());
 
   return (
-    <QueryClientProvider client={queryClient}>
-      {children}
-    </QueryClientProvider>
+    // Wrap EVERYTHING inside the SessionProvider
+    <SessionProvider>
+      <QueryClientProvider client={queryClient}>
+        {children}
+      </QueryClientProvider>
+    </SessionProvider>
   );
 }

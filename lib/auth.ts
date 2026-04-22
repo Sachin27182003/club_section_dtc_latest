@@ -19,7 +19,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     Credentials({
       credentials: {
         email: { label: "Email", type: "email" },
-        password: { label: "Password", type: "password" }
+        password: { label: "Password", type: "password" },
       },
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) return null;
@@ -32,7 +32,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 
         const isValid = await bcrypt.compare(
           credentials.password as string,
-          user.password
+          user.password,
         );
 
         if (!isValid) return null;
@@ -42,7 +42,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           id: user.id.toString(),
           name: user.name,
           email: user.email,
-          role: user.role, 
+          role: user.role,
+          clubId: user.clubId || undefined, // ADDED: Pull clubId from DB
         };
       },
     }),
@@ -52,13 +53,20 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       if (user) {
         token.id = user.id;
         token.role = user.role;
+        // ADDED: Attach clubId to the encrypted token
+        token.clubId = user.clubId; 
       }
       return token;
     },
     async session({ session, token }) {
       if (session.user) {
         session.user.id = token.id as string;
-        session.user.role = token.role as "CLUB_ADMIN" | "MODERATOR";
+        session.user.role = token.role as
+          | "SOCIETY_HEAD"
+          | "SOCIETY_MEMBER"
+          | "MODERATOR";
+        // ADDED: Expose clubId to your frontend/server components
+        session.user.clubId = token.clubId as string | undefined;
       }
       return session;
     },
