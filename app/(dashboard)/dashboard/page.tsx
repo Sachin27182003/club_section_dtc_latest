@@ -22,11 +22,11 @@ export default async function DashboardPage() {
   // 2A. CHECK FOR PENDING APPROVAL
   if (currentUser?.status === "PENDING") {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[70vh] text-center px-4 animate-in fade-in duration-500">
-        <div className="w-20 h-20 bg-amber-100 rounded-full flex items-center justify-center mb-6 shadow-sm">
+      <div className="flex flex-col items-center justify-center min-h-[70vh] text-center px-4 animate-in fade-in duration-500 transition-colors">
+        <div className="w-16 h-16 sm:w-20 sm:h-20 bg-amber-100 dark:bg-amber-900/30 rounded-full flex items-center justify-center mb-6 shadow-sm">
           {/* Hourglass Icon */}
           <svg
-            className="w-10 h-10 text-amber-600"
+            className="w-8 h-8 sm:w-10 sm:h-10 text-amber-600 dark:text-amber-500"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -39,15 +39,15 @@ export default async function DashboardPage() {
             />
           </svg>
         </div>
-        <h1 className="text-3xl font-bold text-gray-900 mb-3">
+        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white mb-3">
           Account Pending Approval
         </h1>
-        <p className="text-gray-500 mb-8 max-w-lg text-lg leading-relaxed">
+        <p className="text-gray-500 dark:text-gray-400 mb-8 max-w-lg text-base sm:text-lg leading-relaxed">
           {currentUser.role === "SOCIETY_HEAD"
             ? "Your request to register as a Society Head is currently under review. Please contact your HOD or the College Dean to expedite the approval process."
             : "Your membership request is currently pending. You will gain access to the dashboard once the Society Head approves your account."}
         </p>
-        <div className="inline-flex items-center px-4 py-2 bg-amber-50 text-amber-700 font-medium rounded-full border border-amber-200">
+        <div className="inline-flex items-center px-4 py-2 bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-400 font-medium rounded-full border border-amber-200 dark:border-amber-800/50">
           <span className="w-2 h-2 rounded-full bg-amber-500 mr-2 animate-pulse"></span>
           Status: Review in Progress
         </div>
@@ -58,11 +58,11 @@ export default async function DashboardPage() {
   // 2B. CHECK FOR REJECTED STATUS
   if (currentUser?.status === "REJECTED") {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[70vh] text-center px-4 animate-in fade-in duration-500">
-        <div className="w-20 h-20 bg-red-100 rounded-full flex items-center justify-center mb-6 shadow-sm">
+      <div className="flex flex-col items-center justify-center min-h-[70vh] text-center px-4 animate-in fade-in duration-500 transition-colors">
+        <div className="w-16 h-16 sm:w-20 sm:h-20 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center mb-6 shadow-sm">
           {/* Warning/Cross Icon */}
           <svg
-            className="w-10 h-10 text-red-600"
+            className="w-8 h-8 sm:w-10 sm:h-10 text-red-600 dark:text-red-500"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -75,15 +75,15 @@ export default async function DashboardPage() {
             />
           </svg>
         </div>
-        <h1 className="text-3xl font-bold text-gray-900 mb-3">
+        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white mb-3">
           Account Request Declined
         </h1>
-        <p className="text-gray-500 mb-8 max-w-lg text-lg leading-relaxed">
+        <p className="text-gray-500 dark:text-gray-400 mb-8 max-w-lg text-base sm:text-lg leading-relaxed">
           {currentUser.role === "SOCIETY_HEAD"
             ? "Your request to register as a Society Head has been declined by the administration. Please reach out to your HOD or the College Dean for further details."
             : "Your request to join this society has been declined by the Society Head."}
         </p>
-        <div className="inline-flex items-center px-4 py-2 bg-red-50 text-red-700 font-medium rounded-full border border-red-200">
+        <div className="inline-flex items-center px-4 py-2 bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400 font-medium rounded-full border border-red-200 dark:border-red-800/50">
           <span className="w-2 h-2 rounded-full bg-red-500 mr-2"></span>
           Status: Rejected
         </div>
@@ -92,15 +92,16 @@ export default async function DashboardPage() {
   }
 
   // 3. Fetch User's Club using the isolated function
-  const myClub = await getUserClub(session.user.id);
+  const rawClubResponse = await getUserClub(session.user.id);
 
-  // 4. IF NO CLUB: Show the Empty State (Only Society Heads can create clubs)
-  if (!myClub) {
+  // FIX FOR TYPESCRIPT ERROR: Narrow the type by checking if "id" exists
+  // If it's null, or if it's an error object `{ error: ... }`, this block catches it.
+  if (!rawClubResponse || !("id" in rawClubResponse)) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[60vh] text-center px-4">
-        <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-6">
+      <div className="flex flex-col items-center justify-center min-h-[60vh] text-center px-4 transition-colors">
+        <div className="w-16 h-16 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center mb-6">
           <svg
-            className="w-8 h-8 text-gray-400"
+            className="w-8 h-8 text-gray-400 dark:text-gray-500"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -113,10 +114,10 @@ export default async function DashboardPage() {
             />
           </svg>
         </div>
-        <h1 className="text-2xl font-bold text-gray-900 mb-2">
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
           No Society Associated
         </h1>
-        <p className="text-gray-500 mb-8 max-w-md">
+        <p className="text-gray-500 dark:text-gray-400 mb-8 max-w-md">
           You are not a member or admin of any society yet. Create a new society
           to start managing events and members.
         </p>
@@ -125,7 +126,7 @@ export default async function DashboardPage() {
         {currentUser?.role === "SOCIETY_HEAD" && (
           <Link
             href="/society/new"
-            className="bg-blue-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-blue-700 transition-colors"
+            className="bg-blue-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 transition-colors"
           >
             + Create New Society
           </Link>
@@ -134,10 +135,12 @@ export default async function DashboardPage() {
     );
   }
 
+  // TypeScript now perfectly understands that myClub is the Club object!
+  const myClub = rawClubResponse;
+
   // 5. IF THEY HAVE A CLUB: Fetch Events
   const currentDate = new Date();
 
-  // Fetch upcoming events (StartDate > Now)
   const upcomingEvents = await db.query.events.findMany({
     where: and(
       eq(events.organizerId, myClub.id),
@@ -146,7 +149,6 @@ export default async function DashboardPage() {
     orderBy: (events, { asc }) => [asc(events.startDate)],
   });
 
-  // Fetch previous events (StartDate < Now)
   const previousEvents = await db.query.events.findMany({
     where: and(
       eq(events.organizerId, myClub.id),
@@ -157,27 +159,29 @@ export default async function DashboardPage() {
 
   // 6. Render the Dashboard
   return (
-    <div className="max-w-6xl mx-auto p-6 space-y-12">
+    <div className="max-w-6xl mx-auto p-4 sm:p-6 space-y-8 sm:space-y-12 transition-colors">
       {/* Society Header */}
-      <section className="bg-white rounded-xl border p-8 shadow-sm flex items-center gap-6">
+      <section className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-6 sm:p-8 shadow-sm flex flex-col sm:flex-row items-center sm:items-start text-center sm:text-left gap-6 transition-colors">
         {myClub.logoUrl ? (
-          <></>
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={myClub.logoUrl}
+            alt={myClub.name}
+            className="w-20 h-20 sm:w-24 sm:h-24 rounded-full object-cover border border-gray-200 dark:border-gray-700"
+          />
         ) : (
-          //   <img
-          //     src={myClub.logoUrl}
-          //     alt={myClub.name}
-          //     className="w-24 h-24 rounded-full object-cover border"
-          //   />
-          <div className="w-24 h-24 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 text-2xl font-bold">
+          <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-blue-600 dark:text-blue-400 text-2xl font-bold shrink-0">
             {myClub.name.charAt(0)}
           </div>
         )}
-        <div>
-          <span className="text-sm font-semibold tracking-wider text-blue-600 uppercase mb-1 block">
+        <div className="flex-1">
+          <span className="text-xs sm:text-sm font-semibold tracking-wider text-blue-600 dark:text-blue-400 uppercase mb-1 block">
             {myClub.type} Society
           </span>
-          <h1 className="text-3xl font-bold text-gray-900">{myClub.name}</h1>
-          <p className="text-gray-500 mt-2 line-clamp-2 max-w-2xl">
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">
+            {myClub.name}
+          </h1>
+          <p className="text-gray-500 dark:text-gray-400 mt-2 line-clamp-3 max-w-2xl text-sm sm:text-base">
             {myClub.description}
           </p>
         </div>
@@ -185,12 +189,14 @@ export default async function DashboardPage() {
 
       {/* Upcoming Events Section */}
       <section>
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-2xl font-bold text-gray-900">Upcoming Events</h2>
+        <div className="flex items-center justify-between mb-4 sm:mb-6">
+          <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">
+            Upcoming Events
+          </h2>
           {currentUser?.role === "SOCIETY_HEAD" && (
             <Link
               href="/events/new"
-              className="text-sm bg-black text-white px-4 py-2 rounded-md hover:bg-gray-800 transition-colors"
+              className="text-xs sm:text-sm bg-gray-900 dark:bg-white text-white dark:text-gray-900 px-3 py-2 sm:px-4 rounded-md hover:bg-gray-800 dark:hover:bg-gray-200 transition-colors"
             >
               + New Event
             </Link>
@@ -198,11 +204,11 @@ export default async function DashboardPage() {
         </div>
 
         {upcomingEvents.length === 0 ? (
-          <div className="bg-gray-50 rounded-lg border border-dashed border-gray-300 p-8 text-center text-gray-500">
+          <div className="bg-gray-50 dark:bg-gray-900/50 rounded-lg border border-dashed border-gray-300 dark:border-gray-700 p-6 sm:p-8 text-center text-sm sm:text-base text-gray-500 dark:text-gray-400">
             No upcoming events. Time to plan something exciting!
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
             {upcomingEvents.map((event) => (
               <EventCard key={event.id} event={event} />
             ))}
@@ -212,15 +218,15 @@ export default async function DashboardPage() {
 
       {/* Previous Events Section */}
       <section>
-        <h2 className="text-2xl font-bold text-gray-900 mb-6">
+        <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white mb-4 sm:mb-6">
           Previous Events
         </h2>
         {previousEvents.length === 0 ? (
-          <div className="bg-gray-50 rounded-lg border border-dashed border-gray-300 p-8 text-center text-gray-500">
+          <div className="bg-gray-50 dark:bg-gray-900/50 rounded-lg border border-dashed border-gray-300 dark:border-gray-700 p-6 sm:p-8 text-center text-sm sm:text-base text-gray-500 dark:text-gray-400">
             No past events to show.
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 opacity-75 hover:opacity-100 transition-opacity">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 opacity-90 hover:opacity-100 transition-opacity">
             {previousEvents.map((event) => (
               <EventCard key={event.id} event={event} isPast />
             ))}
@@ -240,42 +246,44 @@ function EventCard({
   isPast?: boolean;
 }) {
   return (
-    <div className="bg-white border rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow">
+    <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-all duration-200 flex flex-col h-full">
       {event.coverImageUrl ? (
-        <></>
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={event.coverImageUrl}
+          alt={event.title}
+          className="w-full h-32 sm:h-40 object-cover"
+        />
       ) : (
-        // <img
-        //   src={event.coverImageUrl}
-        //   alt={event.title}
-        //   className="w-full h-40 object-cover"
-        // />
-        <div className="w-full h-40 bg-gray-200 flex items-center justify-center text-gray-400">
+        <div className="w-full h-32 sm:h-40 bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-gray-400 dark:text-gray-500 text-sm">
           No Cover Image
         </div>
       )}
-      <div className="p-5">
+      <div className="p-4 sm:p-5 flex flex-col flex-1">
         <div className="flex items-center justify-between mb-2">
           <span
             className={`text-xs font-semibold px-2 py-1 rounded-full ${
               isPast
-                ? "bg-gray-100 text-gray-600"
-                : "bg-green-100 text-green-700"
+                ? "bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300"
+                : "bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400"
             }`}
           >
             {isPast ? "Completed" : event.status}
           </span>
-          <span className="text-xs text-gray-500">
+          <span className="text-xs text-gray-500 dark:text-gray-400">
             {new Date(event.startDate).toLocaleDateString()}
           </span>
         </div>
-        <h3 className="text-lg font-bold text-gray-900 mb-1">{event.title}</h3>
-        <p className="text-sm text-gray-500 line-clamp-2 mb-4">
+        <h3 className="text-base sm:text-lg font-bold text-gray-900 dark:text-white mb-1 line-clamp-1">
+          {event.title}
+        </h3>
+        <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 line-clamp-2 mb-4 flex-1">
           {event.description}
         </p>
 
-        <div className="flex items-center text-sm text-gray-600">
+        <div className="flex items-center text-xs sm:text-sm text-gray-600 dark:text-gray-400 mt-auto pt-4 border-t border-gray-100 dark:border-gray-800">
           <svg
-            className="w-4 h-4 mr-2"
+            className="w-4 h-4 mr-2 shrink-0"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -293,7 +301,9 @@ function EventCard({
               d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
             />
           </svg>
-          {event.isOnline ? "Online Meeting" : event.venue || "TBA"}
+          <span className="truncate">
+            {event.isOnline ? "Online Meeting" : event.venue || "TBA"}
+          </span>
         </div>
       </div>
     </div>
