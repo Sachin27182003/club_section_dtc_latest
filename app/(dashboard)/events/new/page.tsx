@@ -309,7 +309,7 @@ export default function NewEventPage() {
                     <X className="w-4 h-4" />
                   </button>
                 </div>
-                <p className="mt-3 text-xs sm:text-sm font-medium text-gray-900 dark:text-gray-200 truncate max-w-[200px]">
+                <p className="mt-3 text-xs sm:text-sm font-medium text-gray-900 dark:text-gray-200 truncate max-w-50">
                   {fileName}
                 </p>
               </div>

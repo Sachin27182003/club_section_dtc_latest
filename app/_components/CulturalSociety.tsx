@@ -76,7 +76,7 @@ async function CulturalSociety() {
                     alt={club.name}
                     width={72}
                     height={72}
-                    className="w-[72px] h-[72px] rounded-full object-cover shadow-md mb-3"
+                    className="w-18 h-18 rounded-full object-cover shadow-md mb-3"
                   />
 
                   <h3 className="font-bold text-lg text-center">{club.name}</h3>

@@ -35,9 +35,9 @@ export function EventCard({ event, isPast = false }: { event: any; isPast?: bool
       <div className="group dark:bg-[#0f172a] bg-white rounded-[28px] overflow-hidden shadow-lg dark:shadow-2xl transition-all duration-500 hover:-translate-y-2 flex flex-col h-full border-2 dark:border-indigo-400 border-indigo-200">
         
         {/* Society Header */}
-        <div className="p-4 flex items-center gap-3 bg-gradient-to-b dark:from-white/5 from-black/[0.02] to-transparent">
+        <div className="p-4 flex items-center gap-3 bg-linear-to-b dark:from-white/5 from-black/2 to-transparent">
           <div className="relative h-10 w-10 shrink-0">
-            <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-indigo-500 via-purple-500 to-pink-500 animate-spin-slow opacity-70" />
+            <div className="absolute inset-0 rounded-full bg-linear-to-tr from-indigo-500 via-purple-500 to-pink-500 animate-spin-slow opacity-70" />
             <div className="absolute inset-[1.5px] rounded-full dark:bg-[#0f172a] bg-white flex items-center justify-center overflow-hidden">
                <Image src={event.organizer?.logoUrl || "/default-club-logo.png"} width={36} height={36} className="object-cover w-full h-full" alt="logo" />
             </div>
@@ -102,17 +102,17 @@ export function EventCard({ event, isPast = false }: { event: any; isPast?: bool
       {isOpen && (
         <Portal>
           <div 
-            className="fixed inset-0 z-[9999] flex items-center justify-center p-4 sm:p-8 bg-black/60 dark:bg-black/90 backdrop-blur-xl animate-in fade-in duration-300"
+            className="fixed inset-0 z-9999 flex items-center justify-center p-4 sm:p-8 bg-black/60 dark:bg-black/90 backdrop-blur-xl animate-in fade-in duration-300"
             onClick={() => setIsOpen(false)}
           >
             <div 
               className="dark:bg-[#0b0f1a] bg-white rounded-[40px] w-full max-w-5xl h-auto max-h-[90vh] overflow-hidden shadow-2xl relative animate-in zoom-in-95 duration-300 flex flex-col md:flex-row border dark:border-white/10 border-black/5"
               onClick={(e) => e.stopPropagation()}
             >
-              <button onClick={() => setIsOpen(false)} className="absolute top-6 right-6 z-[10000] p-2 dark:bg-white/10 bg-black/5 hover:bg-black/10 dark:hover:bg-white/20 dark:text-white text-gray-900 rounded-full transition-all backdrop-blur-md"><X size={20} /></button>
+              <button onClick={() => setIsOpen(false)} className="absolute top-6 right-6 z-10000 p-2 dark:bg-white/10 bg-black/5 hover:bg-black/10 dark:hover:bg-white/20 dark:text-white text-gray-900 rounded-full transition-all backdrop-blur-md"><X size={20} /></button>
 
               {/* Left: Poster Side */}
-              <div className="relative w-full md:w-[40%] h-[300px] md:h-auto dark:bg-[#161d2e] bg-[#f8f9fb] flex items-center justify-center p-8 border-r dark:border-white/5 border-black/5">
+              <div className="relative w-full md:w-[40%] h-75 md:h-auto dark:bg-[#161d2e] bg-[#f8f9fb] flex items-center justify-center p-8 border-r dark:border-white/5 border-black/5">
                 <div className="relative w-full h-full">
                   <Image src={event.coverImageUrl || "/placeholder-event.jpg"} fill className="object-contain drop-shadow-[0_20px_50px_rgba(0,0,0,0.3)]" alt={event.title} />
                 </div>
