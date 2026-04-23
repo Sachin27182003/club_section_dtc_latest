@@ -6,37 +6,53 @@ import { useRouter } from "next/navigation";
 import { useMutation } from "@tanstack/react-query";
 import { toast } from "react-hot-toast";
 import { Shield, Mail, Lock, ArrowRight } from "lucide-react";
-import { loginUser } from "@/actions/login";
+
+// 1. Import signIn directly from NextAuth React
+import { signIn } from "next-auth/react";
 
 export default function LoginPage() {
   const router = useRouter();
 
-const { mutate: handleLogin, isPending } = useMutation({
-  // 1. Change the variable to FormData
-  mutationFn: async (formData: FormData) => {
-    const result = await loginUser(formData);
-    if (result.error) throw new Error(result.error);
-    return result;
-  },
-  onSuccess: () => {
-    toast.success("Logged in successfully!");
-    router.push("/dashboard");
-    router.refresh();
-  },
-  onError: (error: Error) => {
-    toast.error(error.message);
-  },
-});
+  const { mutate: handleLogin, isPending } = useMutation({
+    mutationFn: async (formData: FormData) => {
+      // 2. Extract credentials here
+      const email = formData.get("email") as string;
+      const password = formData.get("password") as string;
 
-// 2. Extract data in the onSubmit handler
-const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-  e.preventDefault();
-  const formData = new FormData(e.currentTarget); // Extract HERE
-  handleLogin(formData); // Pass the data, not the event
-};
+      // 3. Call the client-side signIn directly
+      const result = await signIn("credentials", {
+        email,
+        password,
+        redirect: false, // This works perfectly on the client-side
+      });
+
+      // 4. Handle Auth.js built-in error responses
+      if (result?.error) {
+        throw new Error("Invalid email or password");
+      }
+
+      return result;
+    },
+    onSuccess: () => {
+      toast.success("Logged in successfully!");
+      router.push("/dashboard");
+
+      // Force a hard refresh of the router so the Next.js layout
+      // realizes the user is now authenticated
+      router.refresh();
+    },
+    onError: (error: Error) => {
+      toast.error(error.message);
+    },
+  });
+
+  const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const formData = new FormData(e.currentTarget);
+    handleLogin(formData);
+  };
 
   return (
-    /* Increased py-12 and added pb-24 to ensure significant space at the bottom */
     <div className="min-h-[calc(100vh-70px)] bg-gray-50 dark:bg-gray-950 flex flex-col justify-center py-12 pb-24 sm:px-6 lg:px-8 transition-colors duration-300">
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
         <div className="flex justify-center">
@@ -49,10 +65,7 @@ const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
         <div className="bg-white dark:bg-gray-900 py-8 px-4 shadow-2xl sm:rounded-xl sm:px-10 border border-gray-100 dark:border-gray-800">
-          <form
-            className="space-y-5"
-            onSubmit={onSubmit}
-          >
+          <form className="space-y-5" onSubmit={onSubmit}>
             {/* Email Field */}
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
@@ -120,31 +133,8 @@ const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
                   </>
                 )}
               </button>
-              <p className="mt-4 text-center text-sm text-gray-600 dark:text-gray-400">
-                New here?{" "}
-                <Link
-                  href="/sign-up"
-                  className="font-medium text-[#232c72] dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 transition-colors"
-                >
-                  Create an account
-                </Link>
-              </p>
             </div>
           </form>
-
-          {/* Secure Access Divider */}
-          <div className="mt-8">
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-gray-200 dark:border-gray-800" />
-              </div>
-              <div className="relative flex justify-center text-xs">
-                <span className="px-2 bg-white dark:bg-gray-900 text-gray-400 uppercase tracking-widest font-medium">
-                  Secure Access
-                </span>
-              </div>
-            </div>
-          </div>
         </div>
       </div>
     </div>

@@ -27,7 +27,7 @@ function Footer() {
             <h3 className="text-orange-500 font-bold text-[17px] mb-4">
               Follow DTC
             </h3>
-            <div className="flex gap-3 -ml-8">
+            <div className="flex gap-3">
               {/* Matched the white circular background with dark grey icons */}
               {[
                 {

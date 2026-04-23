@@ -2,9 +2,9 @@ import Link from "next/link";
 import { eq, and, gt, lt } from "drizzle-orm";
 import { events, users } from "@/lib/db/schema";
 import { db } from "@/lib";
-import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { getUserClub } from "@/actions/fetchSociety";
+import { auth } from "@/lib/db/auth";
 
 export default async function DashboardPage() {
   const session = await auth();
@@ -24,7 +24,6 @@ export default async function DashboardPage() {
     return (
       <div className="flex flex-col items-center justify-center min-h-[70vh] text-center px-4 animate-in fade-in duration-500 transition-colors">
         <div className="w-16 h-16 sm:w-20 sm:h-20 bg-amber-100 dark:bg-amber-900/30 rounded-full flex items-center justify-center mb-6 shadow-sm">
-          {/* Hourglass Icon */}
           <svg
             className="w-8 h-8 sm:w-10 sm:h-10 text-amber-600 dark:text-amber-500"
             fill="none"
@@ -47,10 +46,6 @@ export default async function DashboardPage() {
             ? "Your request to register as a Society Head is currently under review. Please contact your HOD or the College Dean to expedite the approval process."
             : "Your membership request is currently pending. You will gain access to the dashboard once the Society Head approves your account."}
         </p>
-        <div className="inline-flex items-center px-4 py-2 bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-400 font-medium rounded-full border border-amber-200 dark:border-amber-800/50">
-          <span className="w-2 h-2 rounded-full bg-amber-500 mr-2 animate-pulse"></span>
-          Status: Review in Progress
-        </div>
       </div>
     );
   }
@@ -60,7 +55,6 @@ export default async function DashboardPage() {
     return (
       <div className="flex flex-col items-center justify-center min-h-[70vh] text-center px-4 animate-in fade-in duration-500 transition-colors">
         <div className="w-16 h-16 sm:w-20 sm:h-20 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center mb-6 shadow-sm">
-          {/* Warning/Cross Icon */}
           <svg
             className="w-8 h-8 sm:w-10 sm:h-10 text-red-600 dark:text-red-500"
             fill="none"
@@ -83,19 +77,94 @@ export default async function DashboardPage() {
             ? "Your request to register as a Society Head has been declined by the administration. Please reach out to your HOD or the College Dean for further details."
             : "Your request to join this society has been declined by the Society Head."}
         </p>
-        <div className="inline-flex items-center px-4 py-2 bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400 font-medium rounded-full border border-red-200 dark:border-red-800/50">
-          <span className="w-2 h-2 rounded-full bg-red-500 mr-2"></span>
-          Status: Rejected
-        </div>
       </div>
     );
   }
 
-  // 3. Fetch User's Club using the isolated function
+  // ------------------------------------------------------------------
+  // 3. THE MODERATOR DASHBOARD (Shows all societies like your image)
+  // ------------------------------------------------------------------
+  if (currentUser?.role === "MODERATOR") {
+    // Fetch all clubs for the moderator
+    const allSocieties = await db.query.clubs.findMany({
+      orderBy: (clubs, { asc }) => [asc(clubs.name)],
+    });
+
+    return (
+      <div className="max-w-6xl mx-auto p-4 sm:p-6 space-y-8">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-gray-200 dark:border-gray-800 pb-6">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+              Moderator Dashboard
+            </h1>
+            <p className="text-gray-500 dark:text-gray-400 mt-1">
+              Manage and oversee all college societies.
+            </p>
+          </div>
+          <Link
+            href="/society/new"
+            className="bg-blue-600 text-white px-5 py-2.5 rounded-lg font-medium hover:bg-blue-700 transition-colors shadow-sm"
+          >
+            + Create Society
+          </Link>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {allSocieties.map((club) => {
+            const clubSlug =
+              club.slug || club.name.toLowerCase().replace(/\s+/g, "-");
+            return (
+              <Link
+                href={`/clubs/${clubSlug}`}
+                key={club.id}
+                className="group h-full block"
+              >
+                {/* 2. ADDED: `h-full` to the inner div so the background stretches */}
+                <div className="bg-[#121827] border border-gray-800 group-hover:border-blue-500/50 rounded-xl p-5 sm:p-6 flex items-center gap-5 sm:gap-6 shadow-md transition-all duration-300 h-full">
+                  {/* Logo */}
+                  {club.logoUrl ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={
+                        club.logoUrl.startsWith("http")
+                          ? club.logoUrl
+                          : `/${club.logoUrl}`
+                      }
+                      alt={club.name}
+                      className="w-20 h-20 sm:w-24 sm:h-24 rounded-full object-cover shrink-0 ring-2 ring-gray-800 group-hover:ring-blue-500/30 transition-all"
+                    />
+                  ) : (
+                    <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-blue-900/40 flex items-center justify-center text-blue-400 text-3xl font-bold shrink-0 ring-2 ring-gray-800 group-hover:ring-blue-500/30 transition-all">
+                      {club.name.charAt(0)}
+                    </div>
+                  )}
+
+                  {/* Text Content */}
+                  <div className="flex flex-col">
+                    <span className="text-[#3b82f6] text-xs sm:text-sm font-bold uppercase tracking-wider mb-1">
+                      {club.type} SOCIETY
+                    </span>
+                    <h2 className="text-white text-2xl sm:text-3xl font-bold mb-1 group-hover:text-blue-100 transition-colors">
+                      {club.name}
+                    </h2>
+                    <p className="text-gray-400 text-sm sm:text-base line-clamp-2">
+                      {club.description}
+                    </p>
+                  </div>
+                </div>
+              </Link>
+            );
+          })}
+        </div>
+      </div>
+    );
+  }
+  // ------------------------------------------------------------------
+
+  // 4. Fetch User's Club using the isolated function (For normal members/heads)
   const rawClubResponse = await getUserClub(session.user.id);
 
   // FIX FOR TYPESCRIPT ERROR: Narrow the type by checking if "id" exists
-  // If it's null, or if it's an error object `{ error: ... }`, this block catches it.
   if (!rawClubResponse || !("id" in rawClubResponse)) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] text-center px-4 transition-colors">
@@ -121,8 +190,6 @@ export default async function DashboardPage() {
           You are not a member or admin of any society yet. Create a new society
           to start managing events and members.
         </p>
-
-        {/* Hide the Create button if they are just a member */}
         {currentUser?.role === "SOCIETY_HEAD" && (
           <Link
             href="/society/new"
@@ -135,7 +202,6 @@ export default async function DashboardPage() {
     );
   }
 
-  // TypeScript now perfectly understands that myClub is the Club object!
   const myClub = rawClubResponse;
 
   // 5. IF THEY HAVE A CLUB: Fetch Events
@@ -157,7 +223,7 @@ export default async function DashboardPage() {
     orderBy: (events, { desc }) => [desc(events.startDate)],
   });
 
-  // 6. Render the Dashboard
+  // 6. Render the Regular Member/Head Dashboard
   return (
     <div className="max-w-6xl mx-auto p-4 sm:p-6 space-y-8 sm:space-y-12 transition-colors">
       {/* Society Header */}
@@ -202,7 +268,6 @@ export default async function DashboardPage() {
             </Link>
           )}
         </div>
-
         {upcomingEvents.length === 0 ? (
           <div className="bg-gray-50 dark:bg-gray-900/50 rounded-lg border border-dashed border-gray-300 dark:border-gray-700 p-6 sm:p-8 text-center text-sm sm:text-base text-gray-500 dark:text-gray-400">
             No upcoming events. Time to plan something exciting!
@@ -262,11 +327,7 @@ function EventCard({
       <div className="p-4 sm:p-5 flex flex-col flex-1">
         <div className="flex items-center justify-between mb-2">
           <span
-            className={`text-xs font-semibold px-2 py-1 rounded-full ${
-              isPast
-                ? "bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300"
-                : "bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400"
-            }`}
+            className={`text-xs font-semibold px-2 py-1 rounded-full ${isPast ? "bg-green-500 dark:bg-green-700 text-neutral-800 dark:text-neutral-100" : "bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400"}`}
           >
             {isPast ? "Completed" : event.status}
           </span>
@@ -280,7 +341,6 @@ function EventCard({
         <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 line-clamp-2 mb-4 flex-1">
           {event.description}
         </p>
-
         <div className="flex items-center text-xs sm:text-sm text-gray-600 dark:text-gray-400 mt-auto pt-4 border-t border-gray-100 dark:border-gray-800">
           <svg
             className="w-4 h-4 mr-2 shrink-0"
@@ -309,3 +369,47 @@ function EventCard({
     </div>
   );
 }
+
+//  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+//           {allSocieties.map((club) => {
+//             const clubSlug =
+//               club.slug || club.name.toLowerCase().replace(/\s+/g, "-");
+//             return (
+//               <Link href={`/clubs/${clubSlug}`} key={club.id} className="group">
+//                 {/* Replicating the exact card from your image */}
+//                 <div className="bg-[#121827] border border-gray-800 group-hover:border-blue-500/50 rounded-xl p-5 sm:p-6 flex items-center gap-5 sm:gap-6 shadow-md transition-all duration-300">
+//                   {/* Logo */}
+//                   {club.logoUrl ? (
+//                     // eslint-disable-next-line @next/next/no-img-element
+//                     <img
+//                       src={
+//                         club.logoUrl.startsWith("http")
+//                           ? club.logoUrl
+//                           : `/${club.logoUrl}`
+//                       }
+//                       alt={club.name}
+//                       className="w-20 h-20 sm:w-24 sm:h-24 rounded-full object-cover shrink-0 ring-2 ring-gray-800 group-hover:ring-blue-500/30 transition-all"
+//                     />
+//                   ) : (
+//                     <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-blue-900/40 flex items-center justify-center text-blue-400 text-3xl font-bold shrink-0 ring-2 ring-gray-800 group-hover:ring-blue-500/30 transition-all">
+//                       {club.name.charAt(0)}
+//                     </div>
+//                   )}
+
+//                   {/* Text Content */}
+//                   <div className="flex flex-col">
+//                     <span className="text-[#3b82f6] text-xs sm:text-sm font-bold uppercase tracking-wider mb-1">
+//                       {club.type} SOCIETY
+//                     </span>
+//                     <h2 className="text-white text-2xl sm:text-3xl font-bold mb-1 group-hover:text-blue-100 transition-colors">
+//                       {club.name}
+//                     </h2>
+//                     <p className="text-gray-400 text-sm sm:text-base line-clamp-2">
+//                       {club.description}
+//                     </p>
+//                   </div>
+//                 </div>
+//               </Link>
+//             );
+//           })}
+//         </div>

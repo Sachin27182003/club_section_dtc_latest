@@ -3,10 +3,10 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Providers from "@/components/Providers";
 import Navbar from "@/app/_components/Navbar";
-import { auth } from "@/lib/auth";
 import Footer from "./_components/Footer";
 import Link from "next/link";
 import toast, { Toaster } from "react-hot-toast";
+import { auth } from "@/lib/db/auth";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -38,7 +38,7 @@ export default async function RootLayout({
 }) {
   const session = await auth();
 
-  console.log("@SESSION", session)
+  console.log("@SESSION", session);
 
   if (!process.env.DATABASE_URL) {
     console.error("DATABASE URL IS MISSING");

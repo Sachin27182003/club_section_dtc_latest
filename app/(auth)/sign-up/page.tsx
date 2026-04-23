@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { useMutation } from "@tanstack/react-query";
 import { toast } from "react-hot-toast";
 import { createUser } from "@/actions/createUser";
+import { signIn } from "next-auth/react"; // ADD THIS IMPORT
 import {
   Shield,
   User,
@@ -21,7 +22,6 @@ import { SignupFormData } from "@/type/user";
 export default function SignupPage() {
   const router = useRouter();
 
-  // TRACK THE SPECIFIC ROLE INSTEAD OF A BOOLEAN
   const [selectedRole, setSelectedRole] = useState<
     "SOCIETY_HEAD" | "SOCIETY_MEMBER" | "MODERATOR"
   >("SOCIETY_MEMBER");
@@ -36,9 +36,24 @@ export default function SignupPage() {
       if (result.error) throw new Error(result.error);
       return result;
     },
-    onSuccess: () => {
-      toast.success("Account created!");
-      router.push("/sign-in");
+    // USE `variables` to access the email/password they just typed
+    onSuccess: async (data, variables) => {
+      toast.success("Account created! Logging you in...");
+
+      // Auto-login the user immediately
+      const signInResult = await signIn("credentials", {
+        email: variables.email,
+        password: variables.password,
+        redirect: false, // Prevents a hard page reload
+      });
+
+      if (signInResult?.error) {
+        toast.error("Auto-login failed. Please sign in manually.");
+        router.push("/login");
+      } else {
+        router.push("/dashboard");
+        router.refresh(); // Refreshes server components to recognize the new session cookie
+      }
     },
     onError: (error: Error) => {
       toast.error(error.message);

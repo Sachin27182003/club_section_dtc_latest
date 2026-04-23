@@ -1,6 +1,3 @@
-"use client";
-
-// Removed brand icons from the import
 import Navbar from "@/app/_components/Navbar";
 import { Reveal } from "@/app/_components/Reveal";
 import Hero from "@/app/_components/Hero";
@@ -11,15 +8,13 @@ import UpcomingEvents from "@/app/_components/UpcomingEvents";
 import PastEvents from "@/app/_components/PastEvents";
 import Footer from "@/app/_components/Footer";
 import Link from "next/link";
+// 1. Import Suspense from React
+import { Suspense } from "react"; 
+import { getAllEvents } from "@/actions/getAllEvents";
 
-// Added local fallback components for the removed brand icons
+export default async function Home() {
 
-export default function Home() {
-
-    console.log("@URl", process.env.DATABASE_URL);
-  console.log("@KEY", process.env.MODERATOR_SECRET_KEY);
-  console.log("@SECRET", process.env.AUTH_SECRET);
-  // --- Carousel Logic ---
+  const allEvents = await getAllEvents();
 
   return (
     <main className="min-h-screen bg-rose-50 dark:bg-rose-950 text-dtc-text overflow-x-hidden font-sans">
@@ -30,11 +25,19 @@ export default function Home() {
       <section id="clubs" className="bg-[#232c72] p-6 md:p-10 text-center">
         <Reveal>
           <h1 className="text-3xl text-neutral-200 font-bold mb-6">
-            Clubs / Societies (17)
+            Clubs / Societies
           </h1>
         </Reveal>
-        <TechnicalSociety />
-        <CulturalSociety />
+        
+        {/* 2. Wrap your async components in Suspense boundaries */}
+        <Suspense fallback={<div className="text-white p-10">Loading Technical Societies...</div>}>
+          <TechnicalSociety />
+        </Suspense>
+
+        <Suspense fallback={<div className="text-white p-10">Loading Cultural Societies...</div>}>
+          <CulturalSociety />
+        </Suspense>
+
         <Feature />
       </section>
 
@@ -44,16 +47,18 @@ export default function Home() {
           <h1 className="text-4xl text-center font-bold mb-10">Events</h1>
         </Reveal>
 
-        {/* Upcoming */}
-        <UpcomingEvents />
+        {/* Note: If UpcomingEvents and PastEvents are ALSO async functions, wrap them in Suspense too! */}
+        <Suspense fallback={<div>Loading Events...</div>}>
+          <UpcomingEvents events={allEvents} />
+        </Suspense>
 
-        {/* Past Events Scroll */}
-        <PastEvents />
+        <Suspense fallback={<div>Loading Events...</div>}>
+          <PastEvents events={allEvents} />
+        </Suspense>
       </section>
 
       {/* FOOTER */}
       
-
       {/* COPYRIGHT BOTTOM BAR */}
       
     </main>

@@ -3,7 +3,7 @@
 import { clubs, users } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 import { db } from "@/lib"; // Adjust based on your setup
-import { auth } from "@/lib/auth";
+import { auth } from "@/lib/db/auth";
 import { revalidatePath } from "next/cache";
 import { v2 as cloudinary } from "cloudinary";
 
@@ -26,7 +26,7 @@ export async function createSociety(formData: FormData) {
   const description = formData.get("description") as string;
   const type = formData.get("type") as "TECHNICAL" | "CULTURAL";
   const categoriesRaw = formData.get("categories") as string;
-  
+
   // Social links
   const instagram = (formData.get("instagram") as string) || null;
   const linkedin = (formData.get("linkedin") as string) || null;
@@ -40,15 +40,18 @@ export async function createSociety(formData: FormData) {
 
   // 3. Convert comma-separated categories into a JSON array
   const categories = categoriesRaw
-    ? categoriesRaw.split(",").map((c) => c.trim()).filter(Boolean)
+    ? categoriesRaw
+        .split(",")
+        .map((c) => c.trim())
+        .filter(Boolean)
     : [];
 
   // 4. Generate a safe URL slug
   const slug = name
     .toLowerCase()
     .trim()
-    .replace(/[^a-z0-9]+/g, "-") 
-    .replace(/^-+|-+$/g, "");    
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
 
   try {
     // 5. Check if a society with this name or slug already exists
@@ -90,12 +93,13 @@ export async function createSociety(formData: FormData) {
       instagram,
       linkedin,
       website,
-      youtube, 
-      linktree, 
+      youtube,
+      linktree,
     });
 
     // 7. Update the User's profile to link them to this new club
-    await db.update(users)
+    await db
+      .update(users)
       .set({ clubId: newClubId })
       .where(eq(users.id, session.user.id));
 
@@ -105,6 +109,8 @@ export async function createSociety(formData: FormData) {
     return { success: true, clubId: newClubId };
   } catch (error) {
     console.error("Failed to create society:", error);
-    return { error: "An unexpected error occurred while creating the society." };
+    return {
+      error: "An unexpected error occurred while creating the society.",
+    };
   }
 }

@@ -5,7 +5,6 @@ import { eq } from "drizzle-orm";
 import bcrypt from "bcryptjs";
 import { ActionResponse } from "@/type/actions";
 import { SignupFormData } from "@/type/user";
-import { signIn } from "@/lib/auth";
 import { db } from "@/lib";
 
 export async function createUser(
@@ -25,7 +24,7 @@ export async function createUser(
     let assignedRole = role || "SOCIETY_MEMBER";
     let assignedStatus: "PENDING" | "ACTIVE" = "PENDING";
 
-    // Security Check: If they want to be a Moderator, verify the key
+    // Security Check
     if (assignedRole === "MODERATOR") {
       if (secretKey === process.env.MODERATOR_SECRET_KEY) {
         assignedStatus = "ACTIVE";
@@ -41,17 +40,12 @@ export async function createUser(
       name,
       password: hashedPassword,
       clubId,
-      designation, // Saved to DB
+      designation, 
       role: assignedRole,
       status: assignedStatus,
     });
 
-    await signIn("credentials", {
-      email,
-      password,
-      redirect: false,
-    });
-
+    // Just return success here! We handle login on the client.
     return { success: true };
   } catch (error: any | { message: string }) {
     console.error("DB_ERROR:", error);

@@ -1,52 +1,36 @@
+"use client";
+
 import React from "react";
 import { Reveal } from "./Reveal";
-import Image from "next/image";
+import { EventCard } from "./EventCard"; // Import the new card
 
-function UpcomingEvents() {
+interface UpcomingEventsProps {
+  events: any[];
+}
+
+function UpcomingEvents({ events }: UpcomingEventsProps) {
+  const upcomingEvents = events.filter(
+    (event) => new Date(event.startDate) >= new Date(),
+  );
+
+  if (upcomingEvents.length === 0) return null;
+
   return (
-    <>
-      <div className="mb-16 max-w-7xl mx-auto">
-        <Reveal delay={100}>
-          <h2 className="text-2xl mb-6">Upcoming Events (1)</h2>
-        </Reveal>
-        <Reveal delay={200}>
-          {/* Changed invalid md:w-65 to md:w-[260px] */}
-          <div className="w-full md:w-65 bg-white border-2 border-neutral-300 text-black rounded-xl overflow-hidden mx-auto md:mx-0">
-            <div className="bg-[#f2f2f2] p-3 flex items-center gap-3">
-              <Image
-                src="/logo-dtc.png"
-                width={32} 
-                height={32}
-                className="w-8 h-8 rounded-full shadow-sm"
-                alt="logo"
-              />
-              <div>
-                <h4 className="font-bold text-sm">IEEE DTC</h4>
-                <p className="text-xs text-gray-500">6 months ago</p>
-              </div>
-            </div>
-            
-            {/* Added w-full and h-[250px] to the relative wrapper */}
-            <div className="relative w-full h-62.5">
-              <Image
-                src="/ieee-event.jpg"
-                fill
-                className="object-cover shadow-inner"
-                alt="event"
-              />
-              <span className="absolute bottom-3 left-3 bg-green-500 text-white px-3 py-1 rounded-full text-xs font-semibold">
-                Upcoming
-              </span>
-            </div>
-            
-            <div className="p-4">
-              <h3 className="font-bold mb-1">IEEE Umbrella Event</h3>
-              <p className="text-sm text-gray-500">📅 Date TBD</p>
-            </div>
-          </div>
-        </Reveal>
+    <div className="max-w-7xl mx-auto py-10 px-4">
+      <Reveal>
+        <h2 className="text-2xl font-bold mb-8 text-neutral-800 dark:text-neutral-200">
+          Upcoming Events ({upcomingEvents.length})
+        </h2>
+      </Reveal>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        {upcomingEvents.map((event, i) => (
+          <Reveal key={event.id} delay={i * 100}>
+            <EventCard event={event} isPast={false} />
+          </Reveal>
+        ))}
       </div>
-    </>
+    </div>
   );
 }
 

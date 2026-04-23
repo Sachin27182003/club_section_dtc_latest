@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useEffect, useState } from "react";
 import { Reveal } from "./Reveal";
 import Image from "next/image";

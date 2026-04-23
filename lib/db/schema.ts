@@ -66,7 +66,7 @@ export const clubs = mysqlTable("club", {
   logoUrl: varchar("logo_url", { length: 255 }),
 
   // ADDED: The strict categorization for the club
-  type: clubTypeEnum.notNull(), 
+  type: clubTypeEnum.default("TECHNICAL").notNull(),
 
   // Kept: Stored as a JSON array of strings for specific tags: e.g., '["DSA", "Gaming"]'
   categories: json("categories"),
