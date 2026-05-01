@@ -38,8 +38,6 @@ export default async function RootLayout({
 }) {
   const session = await auth();
 
-  console.log("@SESSION", session);
-
   if (!process.env.DATABASE_URL) {
     console.error("DATABASE URL IS MISSING");
   }

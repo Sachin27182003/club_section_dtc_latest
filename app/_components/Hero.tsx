@@ -3,6 +3,8 @@
 import React, { useEffect, useState } from "react";
 import { Reveal } from "./Reveal";
 import Image from "next/image";
+import { LayoutDashboardIcon } from "lucide-react";
+import Link from "next/link"; // Import Link from Next.js
 
 function Hero() {
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -35,9 +37,14 @@ function Hero() {
             <br className="hidden md:block" />
             find your community.
           </p>
-          <button className="mt-8 px-6 py-3 bg-orange-500  text-white rounded-md hover:bg-opacity-90 transition-all">
-            Explore Events
-          </button>
+
+          {/* Wrapped the button in a Link component */}
+          <Link href="/dashboard" className="mt-8">
+            <button className="flex items-center gap-2 px-6 py-3 bg-orange-600 hover:bg-orange-700 hover:underline text-white rounded-md hover:bg-opacity-90 transition-all">
+              <LayoutDashboardIcon size={18} />
+              Dashboard
+            </button>
+          </Link>
         </Reveal>
 
         <Reveal delay={200} className="relative w-50 h-50">

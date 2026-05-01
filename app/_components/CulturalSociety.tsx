@@ -61,7 +61,7 @@ async function CulturalSociety() {
               /* NOTE: Ensure your <Reveal /> component acts as `display: contents` or passes `className="h-full"` if heights still misbehave */
               <Reveal key={club.id || i} delay={100 * (i % 4)} className="h-full" >
                 <Link
-                  href={`/clubs/${clubSlug}`}
+                  href={`/society/${clubSlug}`}
                   // ADDED: `h-full` to make all cards the exact same height
                   className="bg-white dark:bg-slate-800 border-2 border-indigo-900 dark:border-indigo-400 text-gray-900 dark:text-gray-100 p-6 rounded-xl flex flex-col items-center hover:-translate-y-1 hover:shadow-lg transition-all duration-300 w-full h-full"
                 >
