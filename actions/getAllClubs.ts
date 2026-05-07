@@ -13,3 +13,19 @@ export async function getAllClubs() {
     return []; // Return an empty array on error so the UI doesn't break
   }
 }
+
+export async function getClubsForSignup() {
+  try {
+    const allClubs = await db.query.clubs.findMany({
+      columns: {
+        id: true,
+        name: true,
+      },
+      orderBy: (clubs, { asc }) => [asc(clubs.name)],
+    });
+    return allClubs;
+  } catch (error) {
+    console.error("Failed to fetch clubs:", error);
+    return [];
+  }
+}

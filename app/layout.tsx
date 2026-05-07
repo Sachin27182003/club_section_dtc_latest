@@ -52,14 +52,17 @@ export default async function RootLayout({
           <Footer />
           <div className="w-full text-sm py-4 px-4 md:px-10 flex items-center justify-center md:justify-center text-center">
             <p>
-              © All rights reserved Delhi Technical Campus | Built by{" "}
-              <Link
-                href="https://github.com/Sachin27182003"
-                target="_blank"
-                className="hover:text-white transition-colors"
-              >
-                Sachin
-              </Link>{" "}
+              © All rights reserved Delhi Technical Campus | {" "}
+              <span className="hover:underline underline-offset-2 cursor-pointer">
+                {" "}Built by{" "}
+                <Link
+                  href="https://github.com/Sachin27182003"
+                  target="_blank"
+                  className="hover:text-white transition-colors"
+                >
+                  Sachin
+                </Link>{" "}
+              </span>
               {/* |{" "}
               <Link
                 href="https://github.com/rohankamat24"
@@ -76,7 +79,7 @@ export default async function RootLayout({
               >
               Rajat
               </Link>{" "} */}
-              |
+              {" "}|
             </p>
           </div>
         </Providers>

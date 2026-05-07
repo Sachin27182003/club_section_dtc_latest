@@ -10,7 +10,7 @@ import Footer from "@/app/_components/Footer";
 import Link from "next/link";
 // 1. Import Suspense from React
 import { Suspense } from "react"; 
-import { getAllEvents } from "@/actions/getAllEvents";
+import { getAllEvents } from "@/actions/eventActions";
 
 export default async function Home() {
 
@@ -56,10 +56,6 @@ export default async function Home() {
           <PastEvents events={allEvents} />
         </Suspense>
       </section>
-
-      {/* FOOTER */}
-      
-      {/* COPYRIGHT BOTTOM BAR */}
       
     </main>
   );

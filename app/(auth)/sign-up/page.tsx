@@ -3,10 +3,10 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { toast } from "react-hot-toast";
 import { createUser } from "@/actions/createUser";
-import { signIn } from "next-auth/react"; // ADD THIS IMPORT
+import { signIn } from "next-auth/react";
 import {
   Shield,
   User,
@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import { ActionResponse } from "@/type/actions";
 import { SignupFormData } from "@/type/user";
+import { getClubsForSignup } from "@/actions/getAllClubs";
 
 export default function SignupPage() {
   const router = useRouter();
@@ -25,6 +26,11 @@ export default function SignupPage() {
   const [selectedRole, setSelectedRole] = useState<
     "SOCIETY_HEAD" | "SOCIETY_MEMBER" | "MODERATOR"
   >("SOCIETY_MEMBER");
+
+  const { data: clubsList = [], isLoading: isLoadingClubs } = useQuery({
+    queryKey: ["signupClubsList"],
+    queryFn: () => getClubsForSignup(),
+  });
 
   const { mutate: handleSignup, isPending } = useMutation<
     ActionResponse,
@@ -36,15 +42,13 @@ export default function SignupPage() {
       if (result.error) throw new Error(result.error);
       return result;
     },
-    // USE `variables` to access the email/password they just typed
     onSuccess: async (data, variables) => {
       toast.success("Account created! Logging you in...");
 
-      // Auto-login the user immediately
       const signInResult = await signIn("credentials", {
         email: variables.email,
         password: variables.password,
-        redirect: false, // Prevents a hard page reload
+        redirect: false,
       });
 
       if (signInResult?.error) {
@@ -52,7 +56,7 @@ export default function SignupPage() {
         router.push("/login");
       } else {
         router.push("/dashboard");
-        router.refresh(); // Refreshes server components to recognize the new session cookie
+        router.refresh();
       }
     },
     onError: (error: Error) => {
@@ -89,7 +93,7 @@ export default function SignupPage() {
       </div>
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
-        <div className="bg-white dark:bg-gray-900 py-8 px-4 shadow sm:rounded-lg sm:px-10 border border-gray-100 dark:border-gray-800">
+        <div className="bg-white dark:bg-gray-900 py-8 px-4 shadow sm:rounded-lg sm:px-10 border border-gray-100 dark:border-gray-800 transition-colors duration-300">
           {/* 3-WAY ROLE TOGGLE */}
           <div className="flex justify-between mb-6 bg-gray-100 dark:bg-gray-800 p-1 rounded-lg">
             <button
@@ -128,7 +132,6 @@ export default function SignupPage() {
           </div>
 
           <form className="space-y-5" onSubmit={handleSubmit}>
-            {/* Standard Fields (Name, Email, Password) remain unchanged */}
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                 Full Name
@@ -141,7 +144,7 @@ export default function SignupPage() {
                   name="name"
                   type="text"
                   required
-                  className="pl-10 block w-full sm:text-sm bg-transparent border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white rounded-md py-2 border focus:ring-[#232c72] focus:border-[#232c72]"
+                  className="pl-10 block w-full sm:text-sm bg-transparent border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white rounded-md py-2 border focus:ring-[#232c72] focus:border-[#232c72] dark:focus:ring-indigo-500 dark:focus:border-indigo-500 transition-colors"
                   placeholder="John Doe"
                 />
               </div>
@@ -159,7 +162,7 @@ export default function SignupPage() {
                   name="email"
                   type="email"
                   required
-                  className="pl-10 block w-full sm:text-sm bg-transparent border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white rounded-md py-2 border focus:ring-[#232c72] focus:border-[#232c72]"
+                  className="pl-10 block w-full sm:text-sm bg-transparent border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white rounded-md py-2 border focus:ring-[#232c72] focus:border-[#232c72] dark:focus:ring-indigo-500 dark:focus:border-indigo-500 transition-colors"
                   placeholder="john@dtc.edu"
                 />
               </div>
@@ -177,7 +180,7 @@ export default function SignupPage() {
                   name="password"
                   type="password"
                   required
-                  className="pl-10 block w-full sm:text-sm bg-transparent border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white rounded-md py-2 border focus:ring-[#232c72] focus:border-[#232c72]"
+                  className="pl-10 block w-full sm:text-sm bg-transparent border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white rounded-md py-2 border focus:ring-[#232c72] focus:border-[#232c72] dark:focus:ring-indigo-500 dark:focus:border-indigo-500 transition-colors"
                   placeholder="••••••••"
                 />
               </div>
@@ -188,7 +191,7 @@ export default function SignupPage() {
               )}
             </div>
 
-            {/* EXCLUSIVE TO MEMBER: Club ID */}
+            {/* EXCLUSIVE TO MEMBER: Club ID Dropdown */}
             {selectedRole === "SOCIETY_MEMBER" && (
               <div className="animate-in fade-in slide-in-from-top-2 duration-300 space-y-5">
                 <div>
@@ -199,19 +202,66 @@ export default function SignupPage() {
                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                       <Building className="h-5 w-5 text-gray-400" />
                     </div>
-                    <input
+                    <select
                       name="clubId"
-                      type="text"
                       required
-                      className="pl-10 block w-full sm:text-sm bg-transparent border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white rounded-md py-2 border focus:ring-[#232c72] focus:border-[#232c72]"
-                      placeholder="E.g., Music Society"
-                    />
+                      defaultValue=""
+                      className="pl-10 block w-full sm:text-sm bg-transparent border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white rounded-md py-2 border focus:ring-[#232c72] focus:border-[#232c72] dark:focus:ring-indigo-500 dark:focus:border-indigo-500 appearance-none transition-colors"
+                    >
+                      <option
+                        value=""
+                        disabled
+                        className="text-gray-500 bg-white dark:bg-gray-900"
+                      >
+                        Select a Society
+                      </option>
+                      {isLoadingClubs ? (
+                        <option
+                          disabled
+                          className="text-gray-500 bg-white dark:bg-gray-900"
+                        >
+                          Loading societies...
+                        </option>
+                      ) : clubsList.length === 0 ? (
+                        <option
+                          disabled
+                          className="text-gray-500 bg-white dark:bg-gray-900"
+                        >
+                          No societies available
+                        </option>
+                      ) : (
+                        clubsList.map((club) => (
+                          <option
+                            key={club.id}
+                            value={club.id}
+                            className="text-gray-900 dark:text-white bg-white dark:bg-gray-900"
+                          >
+                            {club.name}
+                          </option>
+                        ))
+                      )}
+                    </select>
+                    <div className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
+                      <svg
+                        className="w-4 h-4 text-gray-400"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth="2"
+                          d="M19 9l-7 7-7-7"
+                        />
+                      </svg>
+                    </div>
                   </div>
                 </div>
               </div>
             )}
 
-            {/* EXCLUSIVE TO HEAD: Designation (Fixed Bug Here) */}
+            {/* EXCLUSIVE TO HEAD & MEMBER: Designation */}
             {selectedRole === "SOCIETY_MEMBER" && (
               <div className="animate-in fade-in slide-in-from-top-2 duration-300">
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
@@ -225,8 +275,8 @@ export default function SignupPage() {
                     name="designation"
                     type="text"
                     required
-                    className="pl-10 block w-full sm:text-sm bg-transparent border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white rounded-md py-2 border focus:ring-[#232c72] focus:border-[#232c72]"
-                    placeholder="e.g., President, Technical Head"
+                    className="pl-10 block w-full sm:text-sm bg-transparent border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white rounded-md py-2 border focus:ring-[#232c72] focus:border-[#232c72] dark:focus:ring-indigo-500 dark:focus:border-indigo-500 transition-colors"
+                    placeholder="e.g., Member, Technical Head"
                   />
                 </div>
                 <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">
@@ -249,7 +299,7 @@ export default function SignupPage() {
                     name="secretKey"
                     type="password"
                     required
-                    className="pl-10 block w-full sm:text-sm bg-transparent border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white rounded-md py-2 border focus:ring-rose-500 focus:border-rose-500"
+                    className="pl-10 block w-full sm:text-sm bg-transparent border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white rounded-md py-2 border focus:ring-rose-500 focus:border-rose-500 dark:focus:ring-rose-400 dark:focus:border-rose-400 transition-colors"
                     placeholder="Enter Moderator's authorization key"
                   />
                 </div>
@@ -262,17 +312,17 @@ export default function SignupPage() {
                 disabled={isPending}
                 className={`w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white transition-colors ${
                   isPending
-                    ? "bg-gray-400 cursor-not-allowed"
-                    : "bg-[#232c72] hover:bg-indigo-800"
+                    ? "bg-gray-400 dark:bg-gray-700 cursor-not-allowed"
+                    : "bg-[#232c72] hover:bg-indigo-800 dark:bg-indigo-600 dark:hover:bg-indigo-500"
                 }`}
               >
                 {isPending ? "Processing..." : "Sign Up"}
               </button>
-              <p className="mt-2 text-center text-sm text-gray-600 dark:text-gray-400">
+              <p className="mt-4 text-center text-sm text-gray-600 dark:text-gray-400">
                 Already have an account?{" "}
                 <Link
                   href="/sign-in"
-                  className="font-medium text-[#232c72] hover:text-indigo-800"
+                  className="font-medium text-[#232c72] dark:text-indigo-400 hover:text-indigo-600 dark:hover:text-indigo-300 transition-colors"
                 >
                   Sign in here
                 </Link>

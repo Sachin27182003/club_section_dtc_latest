@@ -3,6 +3,7 @@ import { events } from "@/lib/db/schema";
 import { db } from "@/lib";
 import { getUserClub } from "@/actions/fetchSociety";
 import { UserProfileBanner, EventCard } from "./SharedComponents";
+import Link from "next/link";
 
 export default async function MemberDashboard({ currentUser }: { currentUser: any }) {
   const rawClubResponse = await getUserClub(currentUser.id);
@@ -57,6 +58,15 @@ export default async function MemberDashboard({ currentUser }: { currentUser: an
             <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">{myClub.name}</h1>
             <p className="text-gray-500 dark:text-gray-400 mt-2 line-clamp-3 max-w-2xl text-sm sm:text-base">{myClub.description}</p>
           </div>
+        </div>
+
+        <div className="w-full lg:w-auto flex flex-col sm:flex-row gap-4 pt-6 lg:pt-0 border-t border-gray-100 dark:border-gray-800 lg:border-0 shrink-0">
+          <Link
+            href={`/society/${myClub.slug}/edit`}
+            className="inline-flex items-center justify-center bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white px-6 py-3 rounded-lg font-medium hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors shadow-sm w-full sm:w-auto"
+          >
+            Edit Society
+          </Link>
         </div>
       </section>
 
