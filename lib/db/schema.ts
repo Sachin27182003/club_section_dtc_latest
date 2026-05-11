@@ -29,8 +29,12 @@ export const eventStatusEnum = mysqlEnum("event_status", [
   "CANCELLED",
 ]);
 
-// ADDED: Restricts the club type to only these two options
-export const clubTypeEnum = mysqlEnum("club_type", ["TECHNICAL", "CULTURAL"]);
+// ADDED: Restricts the club type to only these specific options
+export const clubTypeEnum = mysqlEnum("club_type", [
+  "TECHNICAL",
+  "CULTURAL",
+  "STUDENT_CHAPTER",
+]);
 
 // --- USERS TABLE ---
 export const users = mysqlTable("user", {
@@ -49,7 +53,7 @@ export const users = mysqlTable("user", {
   
   // Note: For Society Heads, this is the club they are CREATING. 
   // For Society Members, this is the club they are JOINING.
-  clubId: varchar("club_id", { length: 255 }),
+  clubId: varchar("club_id", { length: 255 }), // Left as is: nullable, so deleting a club doesn't delete the user
   
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().onUpdateNow().notNull(),
@@ -91,7 +95,10 @@ export const members = mysqlTable("member", {
   designation: varchar("designation", { length: 255 }).notNull(),
   imageUrl: varchar("image_url", { length: 255 }),
 
-  clubId: varchar("club_id", { length: 255 }).notNull(),
+  // CHANGED: Added foreign key constraint with cascade delete
+  clubId: varchar("club_id", { length: 255 })
+    .notNull()
+    .references(() => clubs.id, { onDelete: "cascade" }),
 
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().onUpdateNow().notNull(),
@@ -123,7 +130,10 @@ export const events = mysqlTable("event", {
 
   status: eventStatusEnum.default("UPCOMING").notNull(),
 
-  organizerId: varchar("organizer_id", { length: 255 }).notNull(),
+  // CHANGED: Added foreign key constraint with cascade delete
+  organizerId: varchar("organizer_id", { length: 255 })
+    .notNull()
+    .references(() => clubs.id, { onDelete: "cascade" }),
 
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().onUpdateNow().notNull(),

@@ -1,9 +1,12 @@
-import Link from "next/link";
-import { getUserClub } from "@/actions/fetchSociety";
+// SocietyHeadDashboard.tsx
 
+import Link from "next/link";
+import Image from "next/image"; // Added for member images
+import { getUserClub } from "@/actions/fetchSociety";
 import { UserProfileBanner } from "./SharedComponents";
 import { EventCard } from "@/app/_components/EventCard";
 import { getDashboardData } from "@/actions/eventActions";
+import { getClubMembers } from "@/actions/fetchMembers"; // NEW IMPORT
 
 export default async function SocietyHeadDashboard({
   currentUser,
@@ -53,9 +56,13 @@ export default async function SocietyHeadDashboard({
 
   const myClub = rawClubResponse;
 
-  // 2. Fetch Data using separated action file
-  const { rawUpcomingEvents, rawPreviousEvents, pendingMemberRequests } =
-    await getDashboardData(myClub.id);
+  // 2. Fetch Dashboard Data & Members in parallel for performance
+  const [dashboardData, clubMembers] = await Promise.all([
+    getDashboardData(myClub.id),
+    getClubMembers(myClub.id), // Fetch members here
+  ]);
+
+  const { rawUpcomingEvents, rawPreviousEvents, pendingMemberRequests } = dashboardData;
   const headPendingCount = pendingMemberRequests.length;
 
   // 3. Attach organizer info
@@ -81,6 +88,7 @@ export default async function SocietyHeadDashboard({
     <div className="max-w-6xl mx-auto p-4 sm:p-6 space-y-8 sm:space-y-12 transition-colors">
       <UserProfileBanner user={currentUser} />
 
+      {/* Society Header Section */}
       <section className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-6 sm:p-8 shadow-sm flex flex-col lg:flex-row items-center lg:items-start justify-between gap-8 transition-colors">
         <div className="flex flex-col sm:flex-row items-center sm:items-start text-center sm:text-left gap-6 w-full">
           {myClub.logoUrl ? (
@@ -109,7 +117,6 @@ export default async function SocietyHeadDashboard({
         </div>
 
         <div className="w-full lg:w-auto flex flex-col sm:flex-row gap-4 pt-6 lg:pt-0 border-t border-gray-100 dark:border-gray-800 lg:border-0 shrink-0">
-          {/* NEW: Edit Society Button */}
           <Link
             href={`/society/${myClub.slug}/edit`}
             className="inline-flex items-center justify-center bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white px-6 py-3 rounded-lg font-medium hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors shadow-sm w-full sm:w-auto"
@@ -131,6 +138,7 @@ export default async function SocietyHeadDashboard({
         </div>
       </section>
 
+      {/* Upcoming Events Section */}
       <section>
         <div className="flex items-center justify-between mb-4 sm:mb-6">
           <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">
@@ -156,6 +164,7 @@ export default async function SocietyHeadDashboard({
         )}
       </section>
 
+      {/* Previous Events Section */}
       <section>
         <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white mb-4 sm:mb-6">
           Previous Events
@@ -168,6 +177,55 @@ export default async function SocietyHeadDashboard({
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 opacity-90 hover:opacity-100 transition-opacity">
             {previousEvents.map((event) => (
               <EventCard key={event.id} event={event} isPast />
+            ))}
+          </div>
+        )}
+      </section>
+
+      {/* NEW: Society Members Section */}
+      <section className="pt-6 border-t border-gray-200 dark:border-gray-800">
+        <div className="flex items-center justify-between mb-4 sm:mb-6">
+          <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">
+            Society Members
+          </h2>
+          <Link
+            href={`/society/${myClub.slug}/members/add`} // Or wherever your "add member" route is
+            className="text-xs sm:text-sm bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white px-3 py-2 sm:px-4 rounded-md hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+          >
+            Manage Members
+          </Link>
+        </div>
+        
+        {clubMembers.length === 0 ? (
+          <div className="bg-gray-50 dark:bg-gray-900/50 rounded-lg border border-dashed border-gray-300 dark:border-gray-700 p-6 sm:p-8 text-center text-sm sm:text-base text-gray-500 dark:text-gray-400">
+            No members found. Start adding your team!
+          </div>
+        ) : (
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
+            {clubMembers.map((member) => (
+              <div 
+                key={member.id} 
+                className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-4 flex flex-col items-center text-center shadow-sm hover:shadow-md transition-shadow"
+              >
+                {member.imageUrl ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={member.imageUrl}
+                    alt={member.name}
+                    className="w-16 h-16 sm:w-20 sm:h-20 rounded-full object-cover mb-3 border-2 border-gray-100 dark:border-gray-800"
+                  />
+                ) : (
+                  <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center text-indigo-600 dark:text-indigo-400 text-xl font-bold mb-3 border-2 border-transparent">
+                    {member.name.charAt(0).toUpperCase()}
+                  </div>
+                )}
+                <h3 className="font-semibold text-gray-900 dark:text-white text-sm sm:text-base line-clamp-1 w-full">
+                  {member.name}
+                </h3>
+                <span className="text-xs font-medium text-indigo-600 dark:text-indigo-400 mt-1 bg-indigo-50 dark:bg-indigo-900/20 px-2 py-1 rounded-full line-clamp-1 w-full max-w-[90%]">
+                  {member.designation}
+                </span>
+              </div>
             ))}
           </div>
         )}

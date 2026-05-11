@@ -27,7 +27,7 @@ export default async function SocietyProfilePage({
     where: eq(members.clubId, club.id),
   });
 
-  // NEW: Fetch the Society Head's information
+  // 3. Fetch the Society Head's information
   const societyHead = await db.query.users.findFirst({
     where: and(
       eq(users.clubId, club.id),
@@ -36,7 +36,7 @@ export default async function SocietyProfilePage({
     ),
   });
 
-  // 3. Fetch the club's events WITH ORGANIZER RELATION
+  // 4. Fetch the club's events WITH ORGANIZER RELATION
   const currentDate = new Date();
 
   const upcomingEvents = await db.query.events.findMany({
@@ -73,6 +73,29 @@ export default async function SocietyProfilePage({
     console.error("Failed to parse categories");
   }
 
+  // ✨ NEW: Combine Society Head and Members ✨
+  // Create a simulated member object for the Society Head
+  const headAsMember = societyHead
+    ? {
+        id: societyHead.id,
+        name: societyHead.name || "Society Head",
+        // Force designation to "President" if they don't have one set
+        designation: societyHead.designation || "President",
+        imageUrl: null, // Assuming no profile images in the users table yet
+      }
+    : null;
+
+  // Remove the head from the regular members list to prevent duplicates
+  // (Matches by name just in case they were added to the members table)
+  const regularMembers = clubMembers.filter(
+    (m) => m.name !== societyHead?.name,
+  );
+
+  // Put the head at the very front of the array
+  const displayMembers = headAsMember
+    ? [headAsMember, ...regularMembers]
+    : regularMembers;
+
   return (
     <div className="min-h-screen bg-[#0A0F1C] text-white pb-20">
       {/* --- HERO SECTION --- */}
@@ -107,7 +130,7 @@ export default async function SocietyProfilePage({
                   {club.name}
                 </h1>
 
-                {/* NEW: Display Society Head Name */}
+                {/* Display Society Head Name */}
                 {societyHead && (
                   <div className="flex items-center justify-center md:justify-start gap-2 text-gray-400 mt-1">
                     <svg
@@ -125,7 +148,8 @@ export default async function SocietyProfilePage({
                       />
                     </svg>
                     <span className="font-medium text-gray-300">
-                      Headed by <span className="font-bold">{societyHead.name}</span>
+                      Headed by{" "}
+                      <span className="font-bold">{societyHead.name}</span>
                     </span>
                   </div>
                 )}
@@ -173,42 +197,6 @@ export default async function SocietyProfilePage({
       </div>
 
       <div className="max-w-6xl mx-auto px-4 sm:px-6 py-12 space-y-16">
-        {/* --- MEMBERS SECTION --- */}
-        {clubMembers.length > 0 && (
-          <section>
-            <h2 className="text-2xl font-bold text-white mb-6">
-              Our Core Team
-            </h2>
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
-              {clubMembers.map((member) => (
-                <div
-                  key={member.id}
-                  className="bg-[#121827] border border-gray-800 rounded-xl p-4 flex flex-col items-center text-center shadow-sm hover:border-[#3b82f6]/50 transition-colors"
-                >
-                  {member.imageUrl ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img
-                      src={member.imageUrl}
-                      alt={member.name}
-                      className="w-20 h-20 rounded-full object-cover mb-3 ring-2 ring-gray-700"
-                    />
-                  ) : (
-                    <div className="w-20 h-20 rounded-full bg-gray-800 flex items-center justify-center text-gray-400 font-bold text-xl mb-3 ring-2 ring-gray-700">
-                      {member.name.charAt(0)}
-                    </div>
-                  )}
-                  <h3 className="text-white font-bold text-sm line-clamp-1">
-                    {member.name}
-                  </h3>
-                  <p className="text-blue-400 text-xs font-medium uppercase tracking-wider mt-1 line-clamp-1">
-                    {member.designation}
-                  </p>
-                </div>
-              ))}
-            </div>
-          </section>
-        )}
-
         {/* --- EVENTS SECTION --- */}
         <section className="space-y-0">
           {upcomingEvents.length > 0 ? (
@@ -230,6 +218,52 @@ export default async function SocietyProfilePage({
             </div>
           )}
         </section>
+
+        {/* --- MEMBERS SECTION --- */}
+        {displayMembers.length > 0 && (
+          <section>
+            <h2 className="text-2xl font-bold text-white mb-6">
+              Our Core Teams
+            </h2>
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
+              {displayMembers.map((member, index) => {
+                const isPresident = index === 0 && societyHead;
+
+                return (
+                  <div
+                    key={member.id}
+                    className="bg-[#121827] border border-gray-800 hover:border-[#3b82f6]/50 rounded-xl p-4 flex flex-col items-center text-center shadow-sm transition-colors"
+                  >
+                    {member.imageUrl ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={member.imageUrl}
+                        alt={member.name}
+                        className="w-20 h-20 rounded-full object-cover mb-3 ring-2 ring-gray-700"
+                      />
+                    ) : (
+                      <div
+                        className="w-20 h-20 rounded-full flex items-center justify-center font-bold text-xl mb-3 ring-2 bg-gray-800 text-gray-400 ring-gray-700"
+                      >
+                        {member.name.charAt(0)}
+                      </div>
+                    )}
+                    <h3 className="text-white font-bold text-sm line-clamp-1">
+                      {member.name}
+                    </h3>
+                    <p
+                      className={`text-xs font-medium uppercase tracking-wider mt-1 line-clamp-1 ${
+                        isPresident ? "text-amber-400" : "text-blue-400" // KEPT: Yellow text highlight for president
+                      }`}
+                    >
+                      {member.designation}
+                    </p>
+                  </div>
+                );
+              })}
+            </div>
+          </section>
+        )}
       </div>
     </div>
   );

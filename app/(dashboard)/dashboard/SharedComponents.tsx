@@ -1,3 +1,5 @@
+// SharedComponents.tsx
+
 import Link from "next/link";
 
 export function UserProfileBanner({ user }: { user: any }) {

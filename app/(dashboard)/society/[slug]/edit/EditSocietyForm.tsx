@@ -134,6 +134,7 @@ export default function EditSocietyForm({ club }: { club: any }) {
             >
               <option value="TECHNICAL">Technical</option>
               <option value="CULTURAL">Cultural</option>
+              <option value="STUDENT_CHAPTER">Student Chapter</option>
             </select>
           </div>
         </div>
