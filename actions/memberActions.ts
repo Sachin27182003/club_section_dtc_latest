@@ -4,7 +4,7 @@
 
 import { db } from "@/lib";
 import { members, users } from "@/lib/db/schema";
-import { eq } from "drizzle-orm";
+import { eq, and } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { auth } from "@/lib/db/auth";
 import { v2 as cloudinary } from "cloudinary";
@@ -28,7 +28,6 @@ export async function addCoreTeamMember(formData: FormData) {
   let imageUrl: string | null = null;
 
   try {
-    // --- CLOUDINARY UPLOAD LOGIC ---
     if (imageFile && imageFile.size > 0) {
       const arrayBuffer = await imageFile.arrayBuffer();
       const buffer = Buffer.from(arrayBuffer);
@@ -40,7 +39,6 @@ export async function addCoreTeamMember(formData: FormData) {
 
       imageUrl = uploadResponse.secure_url;
     }
-    // -----------------------------------
 
     await db.insert(members).values({
       clubId,
@@ -74,7 +72,6 @@ export async function deleteCoreTeamMember(memberId: string) {
   }
 }
 
-// NEW: Handle transferring the presidency
 export async function transferPresidency(
   clubId: string,
   targetMemberId: string,
@@ -94,33 +91,42 @@ export async function transferPresidency(
       return { error: "Unauthorized. Only the current Society Head can do this." };
     }
 
-    // 1. Find the new president's user account (they MUST have signed up first)
+    // 1. Find the new president's user account
     const newPresidentUser = await db.query.users.findFirst({
       where: eq(users.email, newPresidentEmail),
     });
 
     if (!newPresidentUser) {
-      return { error: "The new president must create an account on the platform first using that email address." };
+      return { error: "The new president must create an account first with that email." };
     }
 
-    // 2. Update the target member's public profile designation
-    await db.update(members)
-      .set({ designation: "President" })
-      .where(eq(members.id, targetMemberId));
+    // 2. DELETE the appointed member from the members table 
+    // (They are now the Society Head, they shouldn't be duplicated in the list)
+    await db.delete(members).where(eq(members.id, targetMemberId));
 
-    // 3. Promote the new user to SOCIETY_HEAD and assign them to this club
+    // 3. Promote the new user to SOCIETY_HEAD
     await db.update(users)
       .set({ role: "SOCIETY_HEAD", clubId: clubId, status: "ACTIVE" })
       .where(eq(users.id, newPresidentUser.id));
 
-    // 4. Handle the Current Head's Account
+    // 4. Handle the Current Head's (Your) Account
     if (headAction === "DELETE") {
-      // Delete the current head's account entirely
       await db.delete(users).where(eq(users.id, currentUser.id));
     } else if (headAction === "DEMOTE") {
-      // Demote current head to a regular member with a new designation
+      // ADD YOU to the core team members table
+      await db.insert(members).values({
+        clubId: clubId,
+        name: currentUser.name || "Former Head",
+        designation: headNewDesignation || "Member",
+        imageUrl: null, 
+      });
+
+      // Update your User role
       await db.update(users)
-        .set({ role: "SOCIETY_MEMBER", designation: headNewDesignation || "Member" })
+        .set({ 
+          role: "SOCIETY_MEMBER", 
+          designation: headNewDesignation || "Member" 
+        })
         .where(eq(users.id, currentUser.id));
     }
 
