@@ -1,3 +1,5 @@
+// sign-in/page.tsx
+
 "use client";
 
 import React from "react";
@@ -92,8 +94,9 @@ export default function LoginPage() {
                   Password
                 </label>
                 <div className="text-xs">
+                  {/* CHANGED: Link now points to /forgot-password */}
                   <Link
-                    href="#"
+                    href="/forgot-password"
                     className="font-medium text-[#232c72] dark:text-indigo-400 hover:underline"
                   >
                     Forgot password?

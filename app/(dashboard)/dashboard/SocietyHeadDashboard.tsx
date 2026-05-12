@@ -1,12 +1,15 @@
 // SocietyHeadDashboard.tsx
 
 import Link from "next/link";
-import Image from "next/image"; // Added for member images
+import Image from "next/image";
 import { getUserClub } from "@/actions/fetchSociety";
 import { UserProfileBanner } from "./SharedComponents";
 import { EventCard } from "@/app/_components/EventCard";
 import { getDashboardData } from "@/actions/eventActions";
-import { getClubMembers } from "@/actions/fetchMembers"; // NEW IMPORT
+import { getClubMembers } from "@/actions/fetchMembers";
+import { db } from "@/lib";
+import { eq } from "drizzle-orm";
+import { passwordResetRequests } from "@/lib/db/schema";
 
 export default async function SocietyHeadDashboard({
   currentUser,
@@ -15,7 +18,6 @@ export default async function SocietyHeadDashboard({
 }) {
   const rawClubResponse = await getUserClub(currentUser.id);
 
-  // 1. Handle "No Society" State
   if (!rawClubResponse || !("id" in rawClubResponse)) {
     return (
       <div className="max-w-6xl mx-auto p-4 sm:p-6 space-y-8">
@@ -56,16 +58,25 @@ export default async function SocietyHeadDashboard({
 
   const myClub = rawClubResponse;
 
-  // 2. Fetch Dashboard Data & Members in parallel for performance
-  const [dashboardData, clubMembers] = await Promise.all([
+  const [dashboardData, clubMembers, allPendingResets] = await Promise.all([
     getDashboardData(myClub.id),
-    getClubMembers(myClub.id), // Fetch members here
+    getClubMembers(myClub.id),
+    db.query.passwordResetRequests.findMany({
+      where: eq(passwordResetRequests.status, "PENDING"),
+      with: { user: true },
+    }),
   ]);
 
-  const { rawUpcomingEvents, rawPreviousEvents, pendingMemberRequests } = dashboardData;
+  const { rawUpcomingEvents, rawPreviousEvents, pendingMemberRequests } =
+    dashboardData;
   const headPendingCount = pendingMemberRequests.length;
 
-  // 3. Attach organizer info
+  const clubPendingResets = allPendingResets.filter(
+    (r) => r.user?.clubId === myClub.id && r.user?.role === "SOCIETY_MEMBER",
+  );
+
+  const totalPendingCount = headPendingCount + clubPendingResets.length;
+
   const upcomingEvents = rawUpcomingEvents.map((event) => ({
     ...event,
     organizer: {
@@ -88,7 +99,6 @@ export default async function SocietyHeadDashboard({
     <div className="max-w-6xl mx-auto p-4 sm:p-6 space-y-8 sm:space-y-12 transition-colors">
       <UserProfileBanner user={currentUser} />
 
-      {/* Society Header Section */}
       <section className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-6 sm:p-8 shadow-sm flex flex-col lg:flex-row items-center lg:items-start justify-between gap-8 transition-colors">
         <div className="flex flex-col sm:flex-row items-center sm:items-start text-center sm:text-left gap-6 w-full">
           {myClub.logoUrl ? (
@@ -129,16 +139,15 @@ export default async function SocietyHeadDashboard({
             className="relative inline-flex items-center justify-center bg-amber-500 text-white px-6 py-3 rounded-lg font-medium hover:bg-amber-600 transition-colors shadow-sm w-full sm:w-auto"
           >
             Pending Requests
-            {headPendingCount > 0 && (
+            {totalPendingCount > 0 && (
               <span className="absolute -top-2 -right-2 flex h-6 w-6 items-center justify-center rounded-full bg-red-600 text-xs font-bold text-white shadow-sm ring-2 ring-white dark:ring-gray-900">
-                {headPendingCount > 99 ? "99+" : headPendingCount}
+                {totalPendingCount > 99 ? "99+" : totalPendingCount}
               </span>
             )}
           </Link>
         </div>
       </section>
 
-      {/* Upcoming Events Section */}
       <section>
         <div className="flex items-center justify-between mb-4 sm:mb-6">
           <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">
@@ -158,13 +167,12 @@ export default async function SocietyHeadDashboard({
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
             {upcomingEvents.map((event) => (
-              <EventCard key={event.id} event={event} />
+              <EventCard key={event.id} event={event} allowEdit={true} allowDelete />
             ))}
           </div>
         )}
       </section>
 
-      {/* Previous Events Section */}
       <section>
         <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white mb-4 sm:mb-6">
           Previous Events
@@ -176,26 +184,25 @@ export default async function SocietyHeadDashboard({
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 opacity-90 hover:opacity-100 transition-opacity">
             {previousEvents.map((event) => (
-              <EventCard key={event.id} event={event} isPast />
+              <EventCard key={event.id} event={event} isPast allowEdit={true} allowDelete />
             ))}
           </div>
         )}
       </section>
 
-      {/* NEW: Society Members Section */}
       <section className="pt-6 border-t border-gray-200 dark:border-gray-800">
         <div className="flex items-center justify-between mb-4 sm:mb-6">
           <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">
             Society Members
           </h2>
           <Link
-            href={`/society/${myClub.slug}/members/add`} // Or wherever your "add member" route is
+            href={`/society/${myClub.slug}/members`}
             className="text-xs sm:text-sm bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white px-3 py-2 sm:px-4 rounded-md hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
           >
             Manage Members
           </Link>
         </div>
-        
+
         {clubMembers.length === 0 ? (
           <div className="bg-gray-50 dark:bg-gray-900/50 rounded-lg border border-dashed border-gray-300 dark:border-gray-700 p-6 sm:p-8 text-center text-sm sm:text-base text-gray-500 dark:text-gray-400">
             No members found. Start adding your team!
@@ -203,8 +210,8 @@ export default async function SocietyHeadDashboard({
         ) : (
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
             {clubMembers.map((member) => (
-              <div 
-                key={member.id} 
+              <div
+                key={member.id}
                 className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-4 flex flex-col items-center text-center shadow-sm hover:shadow-md transition-shadow"
               >
                 {member.imageUrl ? (

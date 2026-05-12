@@ -1,3 +1,5 @@
+// events/new/page.tsx
+
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
@@ -33,9 +35,13 @@ export default function NewEventPage() {
   const [fileName, setFileName] = useState<string | null>(null);
 
   useEffect(() => {
-    if (status === "authenticated" && session?.user?.role !== "SOCIETY_HEAD") {
-      toast.error("Access Denied: Only Society Heads can create events.");
-      router.push("/dashboard");
+    if (status === "authenticated") {
+      const role = session?.user?.role;
+      // CHANGED: Allow both SOCIETY_HEAD and SOCIETY_MEMBER
+      if (role !== "SOCIETY_HEAD" && role !== "SOCIETY_MEMBER") {
+        toast.error("Access Denied: Only Society Core Team can create events.");
+        router.push("/dashboard");
+      }
     } else if (status === "unauthenticated") {
       router.push("/sign-in");
     }
@@ -93,7 +99,12 @@ export default function NewEventPage() {
     );
   }
 
-  if (status === "authenticated" && session?.user?.role !== "SOCIETY_HEAD") {
+  // CHANGED: Prevent rendering if not HEAD or MEMBER
+  if (
+    status === "authenticated" &&
+    session?.user?.role !== "SOCIETY_HEAD" &&
+    session?.user?.role !== "SOCIETY_MEMBER"
+  ) {
     return null;
   }
 

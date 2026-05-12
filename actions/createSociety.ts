@@ -1,3 +1,5 @@
+// actions/createSociety.ts
+
 "use server";
 
 import { clubs, users } from "@/lib/db/schema";

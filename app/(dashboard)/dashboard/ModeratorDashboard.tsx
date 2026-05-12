@@ -1,6 +1,9 @@
+// ModeratorDashboard.tsx
+
 import Link from "next/link";
 import { eq, and } from "drizzle-orm";
-import { users } from "@/lib/db/schema";
+// NEW: Imported passwordResetRequests
+import { users, passwordResetRequests } from "@/lib/db/schema";
 import { db } from "@/lib";
 import { UserProfileBanner } from "./SharedComponents";
 
@@ -13,11 +16,24 @@ export default async function ModeratorDashboard({
     orderBy: (clubs, { asc }) => [asc(clubs.name)],
   });
 
+  // 1. Fetch pending new account requests
   const pendingHeadRequests = await db.query.users.findMany({
     where: and(eq(users.status, "PENDING"), eq(users.role, "SOCIETY_HEAD")),
     columns: { id: true },
   });
+
+  // 2. Fetch pending password reset requests for Society Heads
+  const allPendingResets = await db.query.passwordResetRequests.findMany({
+    where: eq(passwordResetRequests.status, "PENDING"),
+    with: { user: true },
+  });
+  const pendingHeadResets = allPendingResets.filter(
+    (r) => r.user?.role === "SOCIETY_HEAD",
+  );
+
+  // Combine both for the notification badge
   const pendingCount = pendingHeadRequests.length;
+  const totalPendingCount = pendingCount + pendingHeadResets.length;
 
   return (
     <div className="max-w-6xl mx-auto p-4 sm:p-6 space-y-8">
@@ -39,9 +55,10 @@ export default async function ModeratorDashboard({
             className="relative bg-amber-500 text-white px-5 py-2.5 rounded-lg font-medium hover:bg-amber-600 transition-colors shadow-sm w-full sm:w-auto text-center"
           >
             Pending Requests
-            {pendingCount > 0 && (
+            {/* USE TOTAL COUNT HERE */}
+            {totalPendingCount > 0 && (
               <span className="absolute -top-2 -right-2 flex h-6 w-6 items-center justify-center rounded-full bg-red-600 text-xs font-bold text-white shadow-sm ring-2 ring-white dark:ring-[#121827]">
-                {pendingCount > 99 ? "99+" : pendingCount}
+                {totalPendingCount > 99 ? "99+" : totalPendingCount}
               </span>
             )}
           </Link>

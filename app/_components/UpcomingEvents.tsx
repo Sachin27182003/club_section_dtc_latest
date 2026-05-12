@@ -23,7 +23,7 @@ function UpcomingEvents({ events }: UpcomingEventsProps) {
         </h2>
       </Reveal>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-6">
         {upcomingEvents.map((event, i) => (
           <Reveal key={event.id} delay={i * 100}>
             <EventCard event={event} isPast={false} />

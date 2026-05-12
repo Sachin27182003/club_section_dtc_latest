@@ -29,11 +29,17 @@ export const eventStatusEnum = mysqlEnum("event_status", [
   "CANCELLED",
 ]);
 
-// ADDED: Restricts the club type to only these specific options
+// Restricts the club type to only these specific options
 export const clubTypeEnum = mysqlEnum("club_type", [
   "TECHNICAL",
   "CULTURAL",
   "STUDENT_CHAPTER",
+]);
+
+// ADDED: Enum for manual password reset requests
+export const resetRequestStatusEnum = mysqlEnum("reset_status", [
+  "PENDING",
+  "RESOLVED",
 ]);
 
 // --- USERS TABLE ---
@@ -45,7 +51,7 @@ export const users = mysqlTable("user", {
   email: varchar("email", { length: 255 }).notNull().unique(),
   password: varchar("password", { length: 255 }).notNull(),
   
-  // CHANGED: Default to the lowest privilege level
+  // Default to the lowest privilege level
   role: userRoleEnum.default("SOCIETY_MEMBER").notNull(),
   
   designation: varchar("designation", { length: 255 }), 
@@ -69,10 +75,10 @@ export const clubs = mysqlTable("club", {
   description: text("description").notNull(),
   logoUrl: varchar("logo_url", { length: 255 }),
 
-  // ADDED: The strict categorization for the club
+  // The strict categorization for the club
   type: clubTypeEnum.default("TECHNICAL").notNull(),
 
-  // Kept: Stored as a JSON array of strings for specific tags: e.g., '["DSA", "Gaming"]'
+  // Stored as a JSON array of strings for specific tags: e.g., '["DSA", "Gaming"]'
   categories: json("categories"),
 
   // Social Links
@@ -95,7 +101,7 @@ export const members = mysqlTable("member", {
   designation: varchar("designation", { length: 255 }).notNull(),
   imageUrl: varchar("image_url", { length: 255 }),
 
-  // CHANGED: Added foreign key constraint with cascade delete
+  // Added foreign key constraint with cascade delete
   clubId: varchar("club_id", { length: 255 })
     .notNull()
     .references(() => clubs.id, { onDelete: "cascade" }),
@@ -130,13 +136,28 @@ export const events = mysqlTable("event", {
 
   status: eventStatusEnum.default("UPCOMING").notNull(),
 
-  // CHANGED: Added foreign key constraint with cascade delete
+  // Added foreign key constraint with cascade delete
   organizerId: varchar("organizer_id", { length: 255 })
     .notNull()
     .references(() => clubs.id, { onDelete: "cascade" }),
 
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().onUpdateNow().notNull(),
+});
+
+// --- ADDED: PASSWORD RESET REQUESTS TABLE ---
+export const passwordResetRequests = mysqlTable("password_reset_request", {
+  id: varchar("id", { length: 255 })
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
+  
+  // Who is requesting the reset?
+  userId: varchar("user_id", { length: 255 })
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+    
+  status: resetRequestStatusEnum.default("PENDING").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
 // --- RELATIONS (For efficient fetching) ---
@@ -161,9 +182,19 @@ export const eventsRelations = relations(events, ({ one }) => ({
   }),
 }));
 
-export const usersRelations = relations(users, ({ one }) => ({
+export const usersRelations = relations(users, ({ one, many }) => ({
   club: one(clubs, {
     fields: [users.clubId],
     references: [clubs.id],
+  }),
+  // ADDED: Link user to their reset requests
+  passwordResetRequests: many(passwordResetRequests),
+}));
+
+// ADDED: Link reset requests back to the user
+export const passwordResetRelations = relations(passwordResetRequests, ({ one }) => ({
+  user: one(users, {
+    fields: [passwordResetRequests.userId],
+    references: [users.id],
   }),
 }));
